@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Spert — AI Multitool</title>
+<meta name="theme-color" content="#09090b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Spert">
+<meta name="description" content="Self-hosted AI multitool — research, write, build, analyze.">
+<link rel="manifest" id="pwaManifest">
+<script>
+(function(){
+  const m={name:'Spert — AI Multitool',short_name:'Spert',description:'Self-hosted AI multitool',start_url:'./',display:'standalone',background_color:'#09090b',theme_color:'#09090b',icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="%23f97316"/><text x="256" y="340" font-size="280" text-anchor="middle" font-family="serif" fill="white">S</text></svg>',sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]};
+  const blob=new Blob([JSON.stringify(m)],{type:'application/manifest+json'});
+  document.getElementById('pwaManifest').href=URL.createObjectURL(blob);
+})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#09090b;--bg1:#111113;--bg2:#18181b;--bg3:#27272a;--bg4:#3f3f46;
+  --fg:#fafafa;--fg2:#a1a1aa;--fg3:#71717a;--fg4:#52525b;
+  --accent:#f97316;--accent2:#fb923c;--accentd:#c2410c;
+  --accentbg:rgba(249,115,22,.12);--accentbord:rgba(249,115,22,.3);
+  --blue:#3b82f6;--bluebg:rgba(59,130,246,.1);--bluebord:rgba(59,130,246,.3);
+  --green:#22c55e;--greenbg:rgba(34,197,94,.1);--greenbord:rgba(34,197,94,.3);
+  --amber:#f59e0b;--amberbg:rgba(245,158,11,.1);--amberbord:rgba(245,158,11,.3);
+  --red:#ef4444;--redbg:rgba(239,68,68,.1);--redbord:rgba(239,68,68,.3);
+  --purple:#a855f7;--purplebg:rgba(168,85,247,.1);--purplebord:rgba(168,85,247,.3);
+  --teal:#14b8a6;--tealbg:rgba(20,184,166,.1);--tealbord:rgba(20,184,166,.3);
+  --r:8px;--r2:12px;--r3:16px;
+  --ff:'Geist',sans-serif;--fm:'Geist Mono',monospace;--fd:'Instrument Serif',serif;
+  --bord:1px solid var(--bg3);
+  --shadow:0 0 0 1px rgba(255,255,255,.05),0 4px 24px rgba(0,0,0,.4);
+  --art-opacity:.07;
+}
+body.theme-ocean{--bg:#040d18;--bg1:#071629;--bg2:#0a1f3a;--bg3:#0d2a4f;--bg4:#1a4080;--accent:#38bdf8;--accent2:#7dd3fc;--accentd:#0284c7;--accentbg:rgba(56,189,248,.12);--accentbord:rgba(56,189,248,.3)}
+body.theme-forest{--bg:#030f08;--bg1:#051a0e;--bg2:#072614;--bg3:#0a3620;--bg4:#155233;--accent:#4ade80;--accent2:#86efac;--accentd:#16a34a;--accentbg:rgba(74,222,128,.12);--accentbord:rgba(74,222,128,.3)}
+body.theme-violet{--bg:#0a040f;--bg1:#130820;--bg2:#1c0d30;--bg3:#2d1550;--bg4:#4c2580;--accent:#c084fc;--accent2:#d8b4fe;--accentd:#9333ea;--accentbg:rgba(192,132,252,.12);--accentbord:rgba(192,132,252,.3)}
+body.theme-crimson{--bg:#0f0406;--bg1:#1a0509;--bg2:#25070d;--bg3:#3d0d16;--bg4:#6b1525;--accent:#f43f5e;--accent2:#fb7185;--accentd:#e11d48;--accentbg:rgba(244,63,94,.12);--accentbord:rgba(244,63,94,.3)}
+body.theme-gold{--bg:#0d0b04;--bg1:#1a1507;--bg2:#261e0a;--bg3:#3d300f;--bg4:#6b521a;--accent:#fbbf24;--accent2:#fcd34d;--accentd:#d97706;--accentbg:rgba(251,191,36,.12);--accentbord:rgba(251,191,36,.3)}
+body.theme-light{--bg:#f8f9fa;--bg1:#ffffff;--bg2:#f1f3f5;--bg3:#e9ecef;--bg4:#ced4da;--fg:#212529;--fg2:#495057;--fg3:#868e96;--fg4:#adb5bd;--accent:#f97316;--accentbg:rgba(249,115,22,.08);--accentbord:rgba(249,115,22,.25);--shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06)}
+body.dim-25{filter:brightness(.75)}
+body.dim-50{filter:brightness(.55)}
+html{font-size:15px}
+body{font-family:var(--ff);background:var(--bg);color:var(--fg);min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .3s,color .3s,filter .3s}
+#artCanvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:var(--art-opacity);transition:opacity .5s}
+#appWrap{position:relative;z-index:1}
+.nav{position:sticky;top:0;z-index:100;display:flex;align-items:stretch;background:rgba(9,9,11,.9);border-bottom:var(--bord);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.nav-brand{display:flex;align-items:center;gap:8px;padding:0 20px;border-right:var(--bord);text-decoration:none;flex-shrink:0;min-height:48px}
+.nav-mark{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,var(--accent2),var(--accentd));display:flex;align-items:center;justify-content:center;font-size:12px}
+.nav-name{font-family:var(--fd);font-size:17px;color:var(--fg);letter-spacing:-.02em}
+.nav-tabs{display:flex;flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-tab{padding:0 16px;font-size:13px;font-weight:500;color:var(--fg3);cursor:pointer;border:none;background:none;font-family:var(--ff);border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s;-webkit-tap-highlight-color:transparent;min-height:48px}
+.nav-tab:hover{color:var(--fg2)}
+.nav-tab.active{color:var(--fg);border-bottom-color:var(--accent)}
+.nav-right{display:flex;align-items:center;gap:8px;padding:0 12px;flex-shrink:0;border-left:var(--bord)}
+.theme-btn{width:28px;height:28px;border-radius:50%;border:2px solid var(--bg3);cursor:pointer;transition:transform .15s;-webkit-tap-highlight-color:transparent}
+.theme-btn:hover{transform:scale(1.15)}
+.nav-icon-btn{width:32px;height:32px;border-radius:var(--r);border:var(--bord);background:none;color:var(--fg3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.nav-icon-btn:hover{color:var(--fg);background:var(--bg2)}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--fg4);transition:background .3s;flex-shrink:0}
+.status-dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+.tab-panel{display:none;flex:1;flex-direction:column;min-height:calc(100vh - 48px)}
+.tab-panel.active{display:flex}
+.ai-layout{display:flex;flex-direction:column;flex:1}
+.chat-history{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;min-height:200px;-webkit-overflow-scrolling:touch}
+.chat-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:16px;padding:40px 20px;text-align:center}
+.chat-empty-title{font-family:var(--fd);font-size:28px;letter-spacing:-.03em;color:var(--fg)}
+.chat-empty-title em{font-style:italic;color:var(--accent)}
+.chat-empty-sub{font-size:13px;color:var(--fg3);max-width:380px;line-height:1.6}
+.quick-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:460px}
+.qchip{padding:7px 14px;font-size:12px;border-radius:99px;border:var(--bord);background:var(--bg2);color:var(--fg2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.qchip:hover{border-color:var(--accent);color:var(--accent);background:var(--accentbg)}
+.msg{display:flex;flex-direction:column;gap:4px;max-width:100%}
+.msg.user{align-items:flex-end}
+.msg.ai{align-items:flex-start}
+.msg-bubble{padding:11px 14px;border-radius:var(--r2);font-size:14px;line-height:1.7;word-break:break-word;max-width:85%}
+.msg.user .msg-bubble{background:var(--accent);color:#fff;border-radius:var(--r2) var(--r2) 4px var(--r2)}
+.msg.ai .msg-bubble{background:var(--bg2);color:var(--fg);border:var(--bord);border-radius:4px var(--r2) var(--r2) var(--r2)}
+.msg.ai .msg-bubble.error{background:var(--redbg);border-color:var(--redbord);color:var(--red)}
+.msg-meta{font-size:10px;color:var(--fg4);font-family:var(--fm);padding:0 4px}
+.msg-actions{display:flex;gap:4px;padding:0 2px}
+.msg-act{font-size:10px;padding:3px 8px;border-radius:99px;border:var(--bord);background:transparent;color:var(--fg4);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.msg-act:hover{color:var(--fg2);border-color:var(--fg4)}
+.fc-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-family:var(--fm);padding:2px 8px;border-radius:99px;margin-top:6px}
+.fc-badge.pass{background:var(--greenbg);color:var(--green);border:1px solid var(--greenbord)}
+.fc-badge.warn{background:var(--amberbg);color:var(--amber);border:1px solid var(--amberbord)}
+.fc-badge.fail{background:var(--redbg);color:var(--red);border:1px solid var(--redbord)}
+.input-dock{border-top:var(--bord);background:var(--bg1);padding:12px 20px;display:flex;flex-direction:column;gap:8px}
+.input-row{display:flex;gap:8px;align-items:flex-end}
+.main-input{flex:1;padding:11px 14px;font-size:15px;font-family:var(--ff);border:var(--bord);border-radius:var(--r2);background:var(--bg2);color:var(--fg);outline:none;resize:none;min-height:46px;max-height:180px;-webkit-appearance:none;transition:border-color .15s;line-height:1.4;overflow-y:hidden}
+.main-input:focus{border-color:var(--accent)}
+.main-input::placeholder{color:var(--fg4)}
+.send-btn{width:44px;height:44px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,var(--accent2),var(--accentd));color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:opacity .15s;-webkit-tap-highlight-color:transparent}
+.send-btn:active{opacity:.8}
+.send-btn:disabled{opacity:.3;cursor:not-allowed}
+.input-tools{display:flex;gap:5px;flex-wrap:wrap}
+.itool{display:flex;align-items:center;gap:4px;padding:4px 9px;font-size:11px;font-weight:500;font-family:var(--fm);border:var(--bord);border-radius:6px;background:var(--bg2);color:var(--fg3);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;white-space:nowrap}
+.itool:hover{border-color:var(--fg4);color:var(--fg2)}
+.itool.on{border-color:var(--accentbord);background:var(--accentbg);color:var(--accent)}
+.file-chips{display:flex;flex-wrap:wrap;gap:5px}
+.fchip2{display:flex;align-items:center;gap:5px;padding:4px 9px;border:var(--bord);border-radius:6px;background:var(--bg2);font-size:11px;color:var(--fg2);font-family:var(--fm)}
+.fchip2 .rm{cursor:pointer;color:var(--fg4);line-height:1}
+.fchip2 .rm:hover{color:var(--red)}
+.mode-panel{border-top:var(--bord);background:var(--bg1);overflow:hidden;max-height:0;transition:max-height .3s ease}
+.mode-panel.open{max-height:400px}
+.mode-inner{padding:12px 20px;display:flex;flex-direction:column;gap:10px}
+.mode-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.mode-lbl{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3);font-family:var(--fm);min-width:60px}
+.mchip{padding:5px 11px;border-radius:99px;border:var(--bord);font-size:12px;font-weight:500;color:var(--fg3);background:var(--bg2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.mchip:hover{border-color:var(--fg4);color:var(--fg2)}
+.mchip.sel{border-color:var(--accentbord);background:var(--accentbg);color:var(--accent)}
+.passes-row{display:flex;align-items:center;gap:6px}
+.pbtn{width:24px;height:24px;border-radius:5px;border:var(--bord);background:var(--bg2);color:var(--fg2);font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.pnum{width:36px;text-align:center;padding:3px;font-size:13px;font-weight:600;font-family:var(--fm);border:var(--bord);border-radius:5px;background:var(--bg2);color:var(--fg);outline:none}
+.toggle-sm{width:32px;height:18px;border-radius:9px;background:var(--bg3);position:relative;cursor:pointer;flex-shrink:0;transition:background .2s;-webkit-tap-highlight-color:transparent}
+.toggle-sm.on{background:var(--accent)}
+.toggle-sm::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle-sm.on::after{transform:translateX(14px)}
+.upgrade-top-bar{display:flex;gap:6px;padding:10px 16px;border-bottom:var(--bord);flex-shrink:0}
+.utab-btn{padding:5px 14px;border:var(--bord);border-radius:99px;background:transparent;color:var(--fg3);font-size:12px;font-family:var(--ff);cursor:pointer;transition:all .15s}
+.utab-btn.active{background:var(--accentbg);color:var(--accent);border-color:var(--accentbord)}
+.changelog-entry{border-bottom:var(--bord);padding:12px 0;display:flex;flex-direction:column;gap:4px}
+.changelog-entry:last-child{border-bottom:none}
+.changelog-ts{font-size:11px;color:var(--fg4);font-family:var(--fm)}
+.changelog-label{font-size:13px;color:var(--fg);font-weight:500}
+.changelog-detail{font-size:12px;color:var(--fg3)}
+.ud-card{background:var(--bg2);border:var(--bord);border-radius:var(--r2);padding:14px 16px}
+.ud-card-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.ud-prov-name{font-weight:600;font-size:14px;color:var(--fg)}
+.ud-stat-chips{display:flex;gap:5px;flex-wrap:wrap}
+.ud-chip{padding:2px 8px;border:var(--bord);border-radius:20px;font-size:11px;font-family:var(--fm);color:var(--fg3)}
+.ud-rl-section{display:flex;flex-direction:column;gap:8px}
+.ud-rl-row{display:grid;grid-template-columns:120px 1fr auto;align-items:center;gap:8px;font-size:12px;color:var(--fg2)}
+.ud-bar-wrap{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.ud-bar{height:100%;border-radius:3px;transition:width .3s}
+.ud-live-tag{font-size:10px;color:var(--green);font-family:var(--fm);grid-column:1/-1}
+.ud-cards{display:flex;flex-direction:column;gap:10px}
+.ud-section-title{font-size:12px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.05em;margin-top:8px}
+.ud-spark-wrap{display:flex;align-items:flex-end;gap:2px;height:64px;padding:4px 0}
+.ud-spark-bar{flex:1;background:var(--accent);border-radius:2px 2px 0 0;min-height:2px;cursor:default;transition:opacity .15s}
+.ud-spark-bar:hover{opacity:.7}
+.ud-spark-hours{display:flex;justify-content:space-between;font-size:10px;color:var(--fg4);font-family:var(--fm);margin-top:2px}
+.ud-day-chart{display:flex;gap:6px;align-items:flex-end;height:100px;padding:8px 0 0}
+.ud-day-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ud-day-bar{width:100%;background:var(--accent2);border-radius:3px 3px 0 0;min-height:2px;cursor:default}
+.ud-day-label{font-size:10px;color:var(--fg4);font-family:var(--fm)}
+.ud-reco{background:var(--accentbg);border:1px solid var(--accentbord);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--fg2)}
+.drag-overlay{position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .2s}
+.drag-overlay.active{opacity:1;pointer-events:all}
+.drag-box{border:2px dashed var(--accent);border-radius:var(--r3);padding:40px 60px;text-align:center;color:var(--accent);font-size:18px;font-weight:600}
+.drag-box small{display:block;font-size:13px;font-weight:400;color:var(--fg3);margin-top:6px}
+.spin{display:inline-block;width:13px;height:13px;border:2px solid var(--bg3);border-top-color:var(--blue);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+.upgrade-layout{display:flex;flex-direction:column;flex:1;min-height:calc(100vh - 48px)}
+.upgrade-chat{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:10px;-webkit-overflow-scrolling:touch}
+.umsg{border-radius:var(--r2);padding:12px 14px;font-size:13px;line-height:1.7;word-break:break-word}
+.umsg.user{background:var(--accentbg);border:1px solid var(--accentbord);color:var(--fg);align-self:flex-end;max-width:85%;border-radius:var(--r2) var(--r2) 4px var(--r2)}
+.umsg.ai{background:var(--bg2);border:var(--bord);color:var(--fg2);align-self:flex-start;max-width:100%;border-radius:4px var(--r2) var(--r2) var(--r2)}
+.umsg.ai strong{color:var(--fg)}
+.umsg.ai code{font-family:var(--fm);font-size:11.5px;background:var(--bg3);border-radius:4px;padding:1px 5px;color:var(--fg3)}
+.umsg.error-msg{background:var(--redbg);border-color:var(--redbord);color:var(--red)}
+.think-block{background:var(--bg1);border:1px solid var(--accentbord);border-radius:var(--r);margin-bottom:10px;overflow:hidden;font-size:12px}
+.think-header{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;color:var(--accent);font-weight:600;user-select:none;border-bottom:1px solid transparent;transition:border-color .2s}
+.think-header:hover{border-bottom-color:var(--accentbord)}
+.think-header .think-icon{font-size:14px;animation:pulse 1.5s infinite}
+.think-header .think-toggle{margin-left:auto;font-size:10px;color:var(--fg4)}
+.think-body{padding:10px 14px;color:var(--fg3);line-height:1.6;white-space:pre-wrap;max-height:300px;overflow-y:auto;font-family:var(--fm);font-size:11.5px;display:none}
+.think-body.open{display:block}
+.think-step{display:flex;gap:8px;padding:3px 0;align-items:flex-start}
+.think-step::before{content:'›';color:var(--accent);flex-shrink:0;margin-top:1px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.patch-proposal{border:1px solid var(--accentbord);border-radius:var(--r2);background:var(--accentbg);padding:14px;margin-top:10px}
+.patch-title{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);font-family:var(--fm);margin-bottom:10px}
+.patch-checklist{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.patch-item{display:flex;align-items:flex-start;gap:8px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.patch-item input[type=checkbox]{width:15px;height:15px;accent-color:var(--accent);flex-shrink:0;margin-top:2px;cursor:pointer}
+.patch-item-text{font-size:13px;color:var(--fg);line-height:1.5}
+.patch-item-text small{color:var(--fg3);font-size:11px;display:block;margin-top:1px}
+.patch-btns{display:flex;gap:6px;flex-wrap:wrap}
+.pbtn-primary{padding:8px 16px;font-size:13px;font-weight:600;font-family:var(--ff);background:var(--accent);color:#fff;border:none;border-radius:var(--r);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.pbtn-primary:hover{opacity:.85}
+.pbtn-secondary{padding:8px 14px;font-size:13px;font-weight:500;font-family:var(--ff);background:var(--bg3);color:var(--fg2);border:none;border-radius:var(--r);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pbtn-ghost{padding:8px 14px;font-size:13px;font-family:var(--ff);background:transparent;color:var(--fg4);border:var(--bord);border-radius:var(--r);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.upgrade-input-dock{border-top:var(--bord);background:var(--bg1);padding:12px 20px;display:flex;gap:8px;align-items:flex-end}
+.upgrade-input{flex:1;padding:11px 14px;font-size:14px;font-family:var(--ff);border:var(--bord);border-radius:var(--r2);background:var(--bg2);color:var(--fg);outline:none;resize:none;min-height:46px;max-height:120px;-webkit-appearance:none;transition:border-color .15s;line-height:1.5}
+.upgrade-input:focus{border-color:var(--accent)}
+.upgrade-send{width:44px;height:44px;border-radius:var(--r2);border:none;background:linear-gradient(135deg,var(--accent2),var(--accentd));color:#fff;font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent}
+.upgrade-send:disabled{opacity:.3;cursor:not-allowed}
+.apply-progress{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.apply-step{display:flex;align-items:center;gap:6px;font-size:12px;font-family:var(--fm);color:var(--fg3)}
+.apply-step.done{color:var(--green)}
+.apply-step.fail{color:var(--red)}
+.apply-step .si{width:14px;text-align:center}
+.settings-layout{padding:20px;display:flex;flex-direction:column;gap:18px;max-width:580px;margin:0 auto;width:100%}
+.stitle{font-family:var(--fd);font-size:19px;letter-spacing:-.02em;margin-bottom:3px}
+.sdesc{font-size:13px;color:var(--fg3);line-height:1.5;margin-bottom:8px}
+.scard{border:var(--bord);border-radius:var(--r2);background:var(--bg1);padding:14px;display:flex;flex-direction:column;gap:10px}
+.srow{display:flex;flex-direction:column;gap:5px}
+.slabel{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--fg2)}
+.sbadge{font-size:9px;font-weight:700;letter-spacing:.05em;padding:2px 7px;border-radius:99px;text-transform:uppercase}
+.sb-g{background:rgba(34,197,94,.15);color:var(--green)}
+.sb-b{background:rgba(59,130,246,.15);color:var(--blue)}
+.sb-p{background:rgba(168,85,247,.15);color:var(--purple)}
+.sb-o{background:rgba(245,158,11,.15);color:var(--amber)}
+.sinput{width:100%;padding:9px 12px;font-size:13px;font-family:var(--fm);border:var(--bord);border-radius:var(--r);background:var(--bg);color:var(--fg);outline:none;-webkit-appearance:none;transition:border-color .15s}
+.sinput:focus{border-color:var(--accent)}
+.shint{font-size:11px;color:var(--fg4);line-height:1.5}
+.shint a{color:var(--accent);text-decoration:none}
+.sdivider{height:1px;background:var(--bg3)}
+.save-btn{padding:10px;font-size:13px;font-weight:600;border:none;border-radius:var(--r);background:var(--accent);color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:opacity .15s}
+.save-btn:active{opacity:.8}
+.save-ok{font-size:12px;color:var(--green);font-family:var(--fm);display:none}
+.test-btn{padding:7px 14px;font-size:12px;font-weight:600;font-family:var(--fm);border:var(--bord);border-radius:var(--r);background:transparent;color:var(--fg2);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.test-btn:hover{border-color:var(--fg4);color:var(--fg)}
+.test-status{font-size:12px;font-family:var(--fm);display:none}
+.theme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+.theme-swatch{border:2px solid var(--bg3);border-radius:var(--r);padding:10px 8px;cursor:pointer;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.theme-swatch:hover{border-color:var(--fg4)}
+.theme-swatch.active{border-color:var(--accent)}
+.swatch-circle{width:28px;height:28px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.swatch-name{font-size:11px;font-weight:500;color:var(--fg2)}
+.brightness-row{display:flex;align-items:center;gap:10px}
+.bslider{flex:1;accent-color:var(--accent)}
+.bright-lbl{font-size:11px;color:var(--fg3);font-family:var(--fm);min-width:28px}
+.art-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.art-option{border:2px solid var(--bg3);border-radius:var(--r);padding:6px;cursor:pointer;text-align:center;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.art-option:hover{border-color:var(--fg4)}
+.art-option.active{border-color:var(--accent)}
+.art-preview{width:100%;height:48px;border-radius:5px;margin-bottom:4px;overflow:hidden}
+.art-name{font-size:10px;color:var(--fg3)}
+.projects-layout{display:flex;flex-direction:column;flex:1;padding:16px 20px;gap:12px}
+.proj-header{display:flex;align-items:center;gap:10px}
+.proj-title{font-family:var(--fd);font-size:20px;letter-spacing:-.02em;flex:1}
+.new-proj-btn{padding:8px 14px;font-size:13px;font-weight:600;border:none;border-radius:var(--r);background:var(--accent);color:#fff;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.proj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.proj-card{border:var(--bord);border-radius:var(--r2);background:var(--bg1);padding:14px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;gap:8px}
+.proj-card:hover{border-color:var(--fg4);background:var(--bg2)}
+.proj-name{font-size:14px;font-weight:600}
+.proj-desc{font-size:12px;color:var(--fg3);line-height:1.5}
+.proj-meta{font-size:10px;color:var(--fg4);font-family:var(--fm)}
+.proj-detail{border:var(--bord);border-radius:var(--r2);background:var(--bg1);padding:16px;display:none;flex-direction:column;gap:12px}
+.proj-detail.open{display:flex}
+.proj-files{display:flex;flex-direction:column;gap:6px}
+.proj-file{display:flex;align-items:center;gap:8px;padding:8px 10px;border:var(--bord);border-radius:var(--r);background:var(--bg2);font-size:12px;color:var(--fg2)}
+.proj-file-name{flex:1;font-family:var(--fm)}
+.apps-layout{display:flex;flex-direction:column;flex:1;padding:16px 20px;gap:12px}
+.apps-header{display:flex;align-items:center;gap:10px}
+.apps-title{font-family:var(--fd);font-size:20px;letter-spacing:-.02em;flex:1}
+.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+.app-card{border:var(--bord);border-radius:var(--r2);background:var(--bg1);padding:14px;display:flex;flex-direction:column;gap:8px;transition:all .15s}
+.app-card:hover{border-color:var(--fg4)}
+.app-icon{font-size:28px;margin-bottom:4px}
+.app-name{font-size:14px;font-weight:600}
+.app-desc{font-size:12px;color:var(--fg3);line-height:1.5;flex:1}
+.app-actions{display:flex;gap:5px}
+.app-btn{flex:1;padding:7px;font-size:12px;font-weight:500;border-radius:var(--r);cursor:pointer;-webkit-tap-highlight-color:transparent;border:var(--bord);background:transparent;color:var(--fg2);transition:all .15s;text-align:center}
+.app-btn.primary{background:var(--accent);color:#fff;border-color:transparent}
+.app-btn:hover{border-color:var(--fg4);color:var(--fg)}
+#appWindow{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+#appWindow.open{display:flex}
+.app-win-inner{width:100%;max-width:900px;height:80vh;background:var(--bg1);border-radius:var(--r2);border:var(--bord);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 80px rgba(0,0,0,.6)}
+.app-win-header{padding:12px 16px;border-bottom:var(--bord);display:flex;align-items:center;gap:10px;background:var(--bg2)}
+.app-win-title{font-size:14px;font-weight:600;flex:1}
+.app-win-close{width:28px;height:28px;border-radius:6px;border:var(--bord);background:transparent;color:var(--fg3);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+#appFrame{flex:1;border:none;background:#fff}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:10px;color:var(--fg4);text-align:center}
+.empty-icon{font-size:36px;margin-bottom:4px}
+.empty-text{font-size:14px}
+.empty-sub{font-size:12px}
+input[type=file]{display:none}
+.hidden{display:none!important}
+.history-sidebar{position:fixed;top:48px;left:0;bottom:0;width:260px;background:var(--bg1);border-right:var(--bord);z-index:50;transform:translateX(-100%);transition:transform .25s ease;display:flex;flex-direction:column;overflow:hidden}
+.history-sidebar.open{transform:translateX(0)}
+.history-sidebar-header{padding:12px 14px;border-bottom:var(--bord);display:flex;align-items:center;gap:8px}
+.history-sidebar-title{font-size:13px;font-weight:600;flex:1}
+.history-close{width:26px;height:26px;border-radius:6px;border:var(--bord);background:transparent;color:var(--fg3);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.history-list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:4px;-webkit-overflow-scrolling:touch}
+.history-item{padding:9px 11px;border-radius:var(--r);border:var(--bord);background:var(--bg2);cursor:pointer;transition:all .15s}
+.history-item:hover{border-color:var(--fg4);background:var(--bg3)}
+.history-item-preview{font-size:12px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history-item-date{font-size:10px;color:var(--fg4);font-family:var(--fm);margin-top:2px}
+.history-import{border-top:var(--bord);padding:10px}
+.history-import-btn{width:100%;padding:8px;font-size:12px;font-weight:500;border:1px dashed var(--bg4);border-radius:var(--r);background:transparent;color:var(--fg3);cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent}
+.history-import-btn:hover{border-color:var(--fg2);color:var(--fg2)}
+.sidebar-overlay{position:fixed;inset:0;top:48px;background:rgba(0,0,0,.5);z-index:49;display:none}
+.sidebar-overlay.open{display:block}
+.model-chips{display:flex;flex-wrap:wrap;gap:5px}
+.model-chip{padding:4px 10px;border-radius:99px;border:var(--bord);font-size:11px;font-weight:500;color:var(--fg3);background:var(--bg2);cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all .15s;font-family:var(--fm)}
+.model-chip:hover{border-color:var(--fg4);color:var(--fg2)}
+.model-chip.sel{border-color:var(--accentbord);background:var(--accentbg);color:var(--accent)}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg2);border:var(--bord);border-radius:var(--r2);padding:10px 18px;font-size:13px;color:var(--fg);box-shadow:var(--shadow);z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal-box{background:var(--bg1);border:var(--bord);border-radius:var(--r2);padding:20px;width:100%;max-width:480px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow)}
+.modal-title{font-size:16px;font-weight:600}
+.modal-desc{font-size:13px;color:var(--fg3);line-height:1.5}
+.modal-textarea{width:100%;min-height:120px;padding:10px;font-size:12px;font-family:var(--fm);border:var(--bord);border-radius:var(--r);background:var(--bg2);color:var(--fg);outline:none;resize:vertical}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end}
+.mbtn{padding:8px 16px;font-size:13px;font-weight:500;border-radius:var(--r);cursor:pointer;border:var(--bord);background:transparent;color:var(--fg2)}
+.mbtn.primary{background:var(--accent);color:#fff;border-color:transparent;font-weight:600}
+</style>
+</head>
+<body class="theme-ocean">
+<canvas id="artCanvas"></canvas>
+<div id="appWrap">
+
+<nav class="nav">
+  <div class="nav-brand">
+    <div class="nav-mark">⚡</div>
+    <span class="nav-name">Spert</span>
+    <span style="font-size:10px;font-family:var(--fm);color:var(--fg4);margin-left:4px" title="Build timestamp">v2026-05-16-C</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showTab('ai',this)">AI</button>
+    <button class="nav-tab" onclick="showTab('upgrade',this)">Upgrade</button>
+    <button class="nav-tab" onclick="showTab('projects',this)">Projects</button>
+    <button class="nav-tab" onclick="showTab('apps',this)">Apps</button>
+    <button class="nav-tab" onclick="showTab('settings',this)">Settings</button>
+  </div>
+  <div class="nav-right">
+    <div class="status-dot" id="statusDot" title="Cloud sync"></div>
+    <button class="nav-icon-btn" onclick="openUsageDashboard()" title="API usage &amp; rate limits" style="position:relative">
+      📊
+      <span id="usageBadge" style="display:none;position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:var(--green)"></span>
+    </button>
+    <button class="nav-icon-btn" onclick="toggleModePanel()" title="AI settings">⚙</button>
+  </div>
+</nav>
+
+<div class="drag-overlay" id="dragOverlay">
+  <div class="drag-box">📎 Drop files here<small>Images, PDFs, text files</small></div>
+</div>
+
+<!-- AI TAB -->
+<div class="tab-panel active" id="tab-ai">
+<div class="ai-layout">
+  <div class="chat-history" id="chatHistory">
+    <div class="chat-empty" id="chatEmpty">
+      <div class="chat-empty-title">What can I help you <em>build</em>?</div>
+      <div class="chat-empty-sub">Ask me anything — research, writing, code, analysis, 3D models, data tools, or anything else.</div>
+      <div class="quick-chips">
+        <div class="qchip" onclick="quickPrompt('Research and summarize the latest AI developments')">📰 Research AI news</div>
+        <div class="qchip" onclick="quickPrompt('Write a professional email about')">✉️ Draft an email</div>
+        <div class="qchip" onclick="quickPrompt('Build me a web app that')">🛠 Build an app</div>
+        <div class="qchip" onclick="quickPrompt('Analyze this data and create a visualization:')">📊 Analyze data</div>
+        <div class="qchip" onclick="quickPrompt('Create a 3D model viewer for')">🎲 3D model</div>
+        <div class="qchip" onclick="quickPrompt('Fact-check this text:')">✅ Fact-check</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE PANEL -->
+  <div class="mode-panel" id="modePanel">
+    <div class="mode-inner">
+      <div class="mode-row">
+        <span class="mode-lbl">Voice</span>
+        <div class="mchip sel" data-v="neutral" onclick="setVoice(this)">Neutral</div>
+        <div class="mchip" data-v="academic" onclick="setVoice(this)">Academic</div>
+        <div class="mchip" data-v="journalist" onclick="setVoice(this)">Journalist</div>
+        <div class="mchip" data-v="casual" onclick="setVoice(this)">Casual</div>
+        <div class="mchip" data-v="executive" onclick="setVoice(this)">Executive</div>
+      </div>
+      <div class="mode-row">
+        <span class="mode-lbl">Passes</span>
+        <div class="passes-row">
+          <div class="pbtn" onclick="adjPasses(-1)">−</div>
+          <input class="pnum" id="passesNum" type="number" min="1" max="5" value="1">
+          <div class="pbtn" onclick="adjPasses(1)">+</div>
+          <span style="font-size:11px;color:var(--fg4);font-family:var(--fm)" id="passDesc">1 pass — fastest</span>
+        </div>
+      </div>
+      <div class="mode-row">
+        <span class="mode-lbl">Fact-check</span>
+        <!-- FIX: Default OFF — saves a second Groq call on every message -->
+        <div class="toggle-sm" id="fcToggle" onclick="this.classList.toggle('on')" title="Self fact-check (uses an extra API call)"></div>
+        <span style="font-size:12px;color:var(--fg3)">Self-verify before sending (uses extra API calls)</span>
+      </div>
+      <div class="mode-row">
+        <span class="mode-lbl">Web search</span>
+        <!-- FIX: wsToggle synced with wsBtn via toggleSearchSyncPanel() -->
+        <div class="toggle-sm on" id="wsToggle" onclick="toggleSearchSyncPanel()"></div>
+        <span style="font-size:12px;color:var(--fg3)">Use live web search when available</span>
+      </div>
+      <div class="mode-row">
+        <span class="mode-lbl">Consensus</span>
+        <div class="toggle-sm" id="consToggle" onclick="this.classList.toggle('on')"></div>
+        <span style="font-size:12px;color:var(--fg3)">Run multiple models and merge answers (slower)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-dock">
+    <div class="file-chips" id="fileChips"></div>
+    <div class="input-row">
+      <textarea class="main-input" id="mainInput" placeholder="Ask anything — research, write, build, analyze…" rows="1"
+        oninput="autoResize(this);saveDraft(this,'mainDraft')"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+    </div>
+    <div class="input-tools">
+      <div class="itool" onclick="document.getElementById('fileInput').click()">📎 Attach</div>
+      <div class="itool" id="voiceBtn" onclick="toggleVoiceInput()" title="Voice input">🎤 Voice</div>
+      <!-- FIX: wsBtn synced with wsToggle via toggleSearchSync() -->
+      <div class="itool on" id="wsBtn" onclick="toggleSearchSync()">🔍 Search</div>
+      <!-- FIX: pdfBtn — inline onclick removed; boot() wires two-step arm→export -->
+      <div class="itool" id="pdfBtn">📄 PDF out</div>
+      <div class="itool" onclick="newChat()">✚ New chat</div>
+    </div>
+  </div>
+  <input type="file" id="fileInput" multiple accept="image/*,.pdf,.txt,.md" onchange="handleFiles(this.files)">
+</div>
+</div>
+
+<!-- UPGRADE TAB -->
+<div class="tab-panel" id="tab-upgrade">
+<div class="upgrade-layout">
+  <div class="upgrade-top-bar">
+    <button class="utab-btn active" id="utab-chat" onclick="switchUpgradeTab('chat')">💬 Chat</button>
+    <button class="utab-btn" id="utab-log" onclick="switchUpgradeTab('log')">📋 Changelog</button>
+  </div>
+  <div class="upgrade-chat" id="upgradeChat"></div>
+  <div class="upgrade-changelog" id="upgradeChangelog" style="display:none;flex:1;overflow-y:auto;padding:16px 20px"></div>
+  <div class="upgrade-input-dock">
+    <textarea class="upgrade-input" id="upgradeInput" placeholder="Describe what you want to add or change… (Enter to send)" rows="1"
+      oninput="autoResize(this);saveDraft(this,'upgradeDraft')"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendUpgrade()}"></textarea>
+    <button class="upgrade-send" id="upgradeSend" onclick="sendUpgrade()">↑</button>
+  </div>
+</div>
+</div>
+
+<!-- PROJECTS TAB -->
+<div class="tab-panel" id="tab-projects">
+<div class="projects-layout">
+  <div class="proj-header">
+    <div class="proj-title">Projects</div>
+    <button class="new-proj-btn" onclick="newProject()">+ New Project</button>
+  </div>
+  <div class="proj-grid" id="projGrid"></div>
+  <div class="proj-detail" id="projDetail"></div>
+</div>
+</div>
+
+<!-- APPS TAB -->
+<div class="tab-panel" id="tab-apps">
+<div class="apps-layout">
+  <div class="apps-header">
+    <div class="apps-title">Apps</div>
+    <button class="new-proj-btn" onclick="requestNewApp()">+ Request App</button>
+  </div>
+  <div id="appGrid" class="app-grid"></div>
+</div>
+</div>
+
+<!-- SETTINGS TAB -->
+<div class="tab-panel" id="tab-settings">
+<div class="settings-layout">
+  <div>
+    <div class="stitle">Appearance</div>
+    <div class="sdesc">Theme, brightness, and background art.</div>
+    <div class="scard">
+      <div class="theme-grid" id="themeGrid"></div>
+      <div class="sdivider"></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12px;color:var(--fg3);min-width:70px">Brightness</span>
+        <div class="brightness-row" style="flex:1">
+          <span class="bright-lbl" id="brightLbl">100%</span>
+          <input class="bslider" type="range" min="40" max="100" value="100" id="brightSlider" oninput="setBrightness(this.value)">
+        </div>
+      </div>
+      <div class="sdivider"></div>
+      <div style="font-size:12px;font-weight:600;color:var(--fg2);margin-bottom:6px">Background Art</div>
+      <div class="art-grid" id="artGrid"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
+        <div class="toggle-sm" id="animArtToggle" onclick="this.classList.toggle('on');toggleAnimArt()"></div>
+        <span style="font-size:12px;color:var(--fg3)">Animate art (subtle motion)</span>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="stitle">API Keys</div>
+    <div class="sdesc">Saved to your browser + Supabase cloud. Never sent anywhere except the AI providers.</div>
+    <div class="scard">
+      <div class="srow">
+        <div class="slabel">Google Gemini <span class="sbadge sb-g">Best · Web Search · 1500/day</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="sinput" id="kGemini" type="password" placeholder="AIza..." autocomplete="off" spellcheck="false" style="flex:1">
+          <span id="kGeminiStatus" style="font-size:12px;font-family:var(--fm);white-space:nowrap"></span>
+        </div>
+        <div class="shint">Free at <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com/apikey</a></div>
+      </div>
+      <div class="sdivider"></div>
+      <div class="srow">
+        <div class="slabel">Groq <span class="sbadge sb-b">Fastest · 14400/day free</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="sinput" id="kGroq" type="password" placeholder="gsk_..." autocomplete="off" spellcheck="false" style="flex:1">
+          <span id="kGroqStatus" style="font-size:12px;font-family:var(--fm);white-space:nowrap"></span>
+        </div>
+        <div class="shint">Free at <a href="https://console.groq.com" target="_blank">console.groq.com</a></div>
+      </div>
+      <div class="sdivider"></div>
+      <div class="srow">
+        <div class="slabel">Mistral <span class="sbadge sb-p">1B tokens/month</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="sinput" id="kMistral" type="password" placeholder="..." autocomplete="off" spellcheck="false" style="flex:1">
+          <span id="kMistralStatus" style="font-size:12px;font-family:var(--fm);white-space:nowrap"></span>
+        </div>
+        <div class="shint">Free at <a href="https://console.mistral.ai" target="_blank">console.mistral.ai</a></div>
+      </div>
+      <div class="sdivider"></div>
+      <div class="srow">
+        <div class="slabel">OpenRouter <span class="sbadge sb-o">30+ free models</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="sinput" id="kOpenRouter" type="password" placeholder="sk-or-..." autocomplete="off" spellcheck="false" style="flex:1">
+          <span id="kOpenRouterStatus" style="font-size:12px;font-family:var(--fm);white-space:nowrap"></span>
+        </div>
+        <div class="shint">Free at <a href="https://openrouter.ai" target="_blank">openrouter.ai</a></div>
+      </div>
+      <button class="save-btn" onclick="saveKeys()">Save &amp; Validate Keys</button>
+      <div class="save-ok" id="saveOk" style="display:none">✓ Saved</div>
+    </div>
+  </div>
+  <div>
+    <div class="stitle">Supabase Cloud Sync</div>
+    <div class="sdesc">Saves keys, settings, chats, and patches across all your devices.</div>
+    <div class="scard">
+      <div class="srow">
+        <input class="sinput" id="sbUrl" placeholder="Supabase Project URL (https://xxx.supabase.co)" oninput="saveSbLocally()">
+        <input class="sinput" id="sbKey" type="password" placeholder="Supabase anon key" oninput="saveSbLocally()">
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="test-btn" id="sbTestBtn" onclick="testSupabase()">Test Connection</button>
+          <button class="test-btn" onclick="clearPatches()" title="Remove all saved patches from cloud">🗑 Clear Patches</button>
+          <div class="test-status" id="sbStatus"></div>
+        </div>
+        <div class="shint">Setup: <a href="https://supabase.com" target="_blank">supabase.com</a> → New project → SQL Editor → run: <code style="font-family:var(--fm);font-size:10px">CREATE TABLE spert_config (id text PRIMARY KEY, data jsonb);</code></div>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="stitle">Models</div>
+    <div class="sdesc">Select which models to use. Green border = key active.</div>
+    <div class="scard">
+      <div class="model-chips" id="modelChips"></div>
+      <div style="font-size:11px;color:var(--fg4);margin-top:6px">✓ = active · Gemini needed for web search · Groq = fastest</div>
+    </div>
+  </div>
+  <div>
+    <div class="stitle">GitHub Auto-Deploy</div>
+    <div class="sdesc">Upgrade Studio pushes changes directly to your GitHub repo. Cloudflare Pages detects the push and redeploys automatically — usually within 60 seconds.</div>
+    <div class="scard">
+      <div class="srow">
+        <div class="slabel">Personal Access Token</div>
+        <input class="sinput" id="ghToken" type="password" placeholder="ghp_... or github_pat_..." autocomplete="off" spellcheck="false" oninput="saveGhLocally()">
+        <div class="shint">Create at <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens/new</a> — check <strong>repo</strong> scope.</div>
+      </div>
+      <div class="srow" style="margin-top:8px">
+        <div class="slabel">Repository</div>
+        <input class="sinput" id="ghRepo" type="text" placeholder="username/repo-name" oninput="saveGhLocally()">
+      </div>
+      <div class="srow" style="margin-top:8px">
+        <div class="slabel">File path in repo</div>
+        <input class="sinput" id="ghFile" type="text" placeholder="index.html" oninput="saveGhLocally()">
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap">
+        <button class="test-btn" id="ghTestBtn" onclick="testGitHub()">Test Connection</button>
+        <button class="test-btn" onclick="testGitHubPush()">Test Push (dry run)</button>
+        <div class="test-status" id="ghStatus" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+</div><!-- end appWrap -->
+
+<!-- HISTORY SIDEBAR -->
+<div class="history-sidebar" id="historySidebar">
+  <div class="history-sidebar-header">
+    <div class="history-sidebar-title">Chat History</div>
+    <button class="history-close" onclick="toggleHistory()">✕</button>
+  </div>
+  <div class="history-list" id="historyList"></div>
+  <div class="history-import">
+    <button class="history-import-btn" onclick="openImportModal()">↓ Import chat from another AI</button>
+  </div>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleHistory()"></div>
+
+<!-- IMPORT MODAL -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal-box">
+    <div class="modal-title">Import Chat from Another AI</div>
+    <div class="modal-desc">Paste exported chat text from ChatGPT, Gemini, or any AI.</div>
+    <textarea class="modal-textarea" id="importText" placeholder="Paste chat text here…"></textarea>
+    <div class="modal-btns">
+      <button class="mbtn" onclick="document.getElementById('importModal').classList.remove('open')">Cancel</button>
+      <button class="mbtn primary" onclick="importChat()">Import →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- USAGE DASHBOARD -->
+<div id="usageDashboard" style="display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.7);align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto" onclick="if(event.target===this)closeUsageDashboard()">
+  <div style="background:var(--bg1);border:var(--bord);border-radius:var(--r3);width:100%;max-width:680px;padding:0;overflow:hidden;margin:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:var(--bord)">
+      <div>
+        <div style="font-size:16px;font-weight:600;color:var(--fg)">📊 API Usage Dashboard</div>
+        <div style="font-size:12px;color:var(--fg3);margin-top:2px">Live rate limits · Usage history · Smart routing</div>
+      </div>
+      <button onclick="closeUsageDashboard()" style="border:none;background:none;color:var(--fg3);font-size:20px;cursor:pointer;padding:4px">×</button>
+    </div>
+    <div id="usageDashboardInner" style="padding:20px;display:flex;flex-direction:column;gap:12px;max-height:80vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- APP WINDOW -->
+<div id="appWindow">
+  <div class="app-win-inner">
+    <div class="app-win-header">
+      <div class="app-win-title" id="appWinTitle">App</div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <textarea id="appWinPrompt" placeholder="Request an upgrade to this app…" rows="1" style="flex:1;padding:6px 10px;font-size:12px;font-family:var(--ff);border:var(--bord);border-radius:var(--r);background:var(--bg3);color:var(--fg);outline:none;resize:none;min-width:200px" oninput="autoResize(this)" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();upgradeApp()}"></textarea>
+        <button onclick="upgradeApp()" style="padding:6px 12px;font-size:12px;font-weight:600;border:none;border-radius:var(--r);background:var(--accent);color:#fff;cursor:pointer">Upgrade</button>
+        <button class="app-win-close" onclick="closeAppWindow()">✕</button>
+      </div>
+    </div>
+    <iframe id="appFrame" sandbox="allow-scripts allow-forms allow-modals"></iframe>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════
+   SUPABASE
+═══════════════════════════════════ */
+let sbUrl='', sbKey='';
+
+function normalizeSbUrl(url) {
+  return (url||'').trim().replace(/\/+$/, '').replace(/\/(rest|auth|storage).*$/, '');
+}
+
+async function sbGet(id) {
+  if (!sbUrl||!sbKey) return null;
+  try {
+    const base = normalizeSbUrl(sbUrl);
+    const r = await fetch(`${base}/rest/v1/spert_config?id=eq.${encodeURIComponent(id)}&select=data`,
+      {headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}});
+    if (!r.ok) { console.warn('Supabase GET failed:', r.status, await r.text()); return null; }
+    const d = await r.json();
+    return d?.[0]?.data ?? null;
+  } catch(e) { console.warn('Supabase GET error:', e.message); return null; }
+}
+
+async function sbSet(id, data) {
+  if (!sbUrl||!sbKey) return;
+  try {
+    const base = normalizeSbUrl(sbUrl);
+    const r = await fetch(`${base}/rest/v1/spert_config`,{
+      method:'POST',
+      headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id,data})
+    });
+    if (!r.ok) {
+      const msg = await r.text();
+      console.warn('Supabase write failed:', r.status, msg);
+      const dot=document.getElementById('statusDot');
+      if(dot){dot.classList.remove('on');dot.style.background='var(--red)';dot.title='Write failed: HTTP '+r.status;}
+    }
+  } catch(e) { console.warn('Supabase SET error:', e.message); }
+}
+
+function saveSbLocally() {
+  sbUrl = document.getElementById('sbUrl').value.trim();
+  sbKey = document.getElementById('sbKey').value.trim();
+  localStorage.setItem('spert_sbUrl', sbUrl);
+  localStorage.setItem('spert_sbKey', sbKey);
+}
+
+async function testSupabase() {
+  sbUrl = normalizeSbUrl(document.getElementById('sbUrl').value.trim());
+  document.getElementById('sbUrl').value = sbUrl;
+  sbKey = document.getElementById('sbKey').value.trim();
+  const btn = document.getElementById('sbTestBtn');
+  const el = document.getElementById('sbStatus');
+  el.style.display='block'; el.style.color='var(--fg3)'; el.textContent='Testing…';
+  btn.disabled = true;
+  if (!sbUrl || !sbKey) { el.textContent='Fill in both fields first.'; el.style.color='var(--amber)'; btn.disabled=false; return; }
+  if (!sbUrl.includes('supabase.co')) { el.textContent='URL should be your-project.supabase.co'; el.style.color='var(--amber)'; btn.disabled=false; return; }
+  try {
+    const testId = 'connection_test_'+Date.now();
+    const writeRes = await fetch(`${sbUrl}/rest/v1/spert_config`,{
+      method:'POST',
+      headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},
+      body:JSON.stringify({id:testId, data:{test:true,ts:Date.now()}})
+    });
+    if (writeRes.status===404) throw new Error('HTTP 404 — table not found. Run: CREATE TABLE spert_config (id text PRIMARY KEY, data jsonb);');
+    if (writeRes.status===401||writeRes.status===403) throw new Error('Auth failed — use your anon/public key.');
+    if (!writeRes.ok) throw new Error('Write failed: HTTP '+writeRes.status);
+    const readRes = await fetch(`${sbUrl}/rest/v1/spert_config?id=eq.${testId}&select=data`,
+      {headers:{'apikey':sbKey,'Authorization':'Bearer '+sbKey}});
+    if (!readRes.ok) throw new Error('Read failed: HTTP '+readRes.status);
+    const data = await readRes.json();
+    if (!data?.[0]?.data?.test) throw new Error('Data verification failed');
+    el.textContent='✓ Connected and verified!'; el.style.color='var(--green)';
+    document.getElementById('statusDot').classList.add('on');
+    saveSbLocally();
+    await syncToCloud();
+  } catch(e) { el.textContent='✗ '+e.message; el.style.color='var(--red)'; }
+  btn.disabled=false;
+}
+
+async function syncToCloud() {
+  if (!sbUrl||!sbKey) return;
+  const keys = {
+    g:  localStorage.getItem('spert_g')||'',
+    gr: localStorage.getItem('spert_gr')||'',
+    m:  localStorage.getItem('spert_m')||'',
+    o:  localStorage.getItem('spert_o')||''
+  };
+  const gh = {
+    token: localStorage.getItem('spert_ghToken')||'',
+    repo:  localStorage.getItem('spert_ghRepo')||'',
+    file:  localStorage.getItem('spert_ghFile')||''
+  };
+  await sbSet('user_config', {keys, gh, selectedVoice, passes, chatHistory, projects, apps, currentTheme, artMode, selectedModels:[...selectedModels]});
+}
+
+async function loadFromCloud() {
+  const d = await sbGet('user_config');
+  if (!d) return;
+  if (d.keys) {
+    if (d.keys.g)  { localStorage.setItem('spert_g',  d.keys.g);  const el=document.getElementById('kGemini');     if(el) el.value=d.keys.g; }
+    if (d.keys.gr) { localStorage.setItem('spert_gr', d.keys.gr); const el=document.getElementById('kGroq');       if(el) el.value=d.keys.gr; }
+    if (d.keys.m)  { localStorage.setItem('spert_m',  d.keys.m);  const el=document.getElementById('kMistral');    if(el) el.value=d.keys.m; }
+    if (d.keys.o)  { localStorage.setItem('spert_o',  d.keys.o);  const el=document.getElementById('kOpenRouter'); if(el) el.value=d.keys.o; }
+  }
+  if (d.gh) {
+    if (d.gh.token) { localStorage.setItem('spert_ghToken',d.gh.token); const el=document.getElementById('ghToken'); if(el) el.value=d.gh.token; }
+    if (d.gh.repo)  { localStorage.setItem('spert_ghRepo', d.gh.repo);  const el=document.getElementById('ghRepo');  if(el) el.value=d.gh.repo; }
+    if (d.gh.file)  { localStorage.setItem('spert_ghFile', d.gh.file);  const el=document.getElementById('ghFile');  if(el) el.value=d.gh.file; }
+  }
+  if (d.selectedVoice) { selectedVoice=d.selectedVoice; document.querySelectorAll('.mchip').forEach(c=>c.classList.toggle('sel',c.dataset.v===selectedVoice)); }
+  if (d.passes) { passes=d.passes; const el=document.getElementById('passesNum'); if(el){el.value=passes;} updatePassDesc(); }
+  if (d.chatHistory) { chatHistory=d.chatHistory; }
+  if (d.projects) { projects=d.projects; renderProjects(); }
+  if (d.apps) { apps=d.apps; renderApps(); }
+  if (d.currentTheme) applyTheme(d.currentTheme, false);
+  if (d.artMode) { artMode=d.artMode; applyArt(artMode); }
+  if (d.selectedModels&&Array.isArray(d.selectedModels)&&d.selectedModels.length) {
+    selectedModels=new Set(d.selectedModels);
+    initModelChips();
+  }
+  const dot=document.getElementById('statusDot');
+  if(dot){dot.classList.add('on'); dot.title='Supabase synced';}
+}
+
+/* ═══════════════════════════════════
+   KEYS & LOCAL STORAGE
+═══════════════════════════════════ */
+async function saveKeys() {
+  const g  = document.getElementById('kGemini')?.value||'';
+  const gr = document.getElementById('kGroq')?.value||'';
+  const m  = document.getElementById('kMistral')?.value||'';
+  const o  = document.getElementById('kOpenRouter')?.value||'';
+  if (g)  localStorage.setItem('spert_g',  g);
+  if (gr) localStorage.setItem('spert_gr', gr);
+  if (m)  localStorage.setItem('spert_m',  m);
+  if (o)  localStorage.setItem('spert_o',  o);
+  syncToCloud();
+  showToast('Validating keys…');
+  const keys=getKeys();
+  await Promise.all([
+    validateApiKey('gemini',     keys.gemini,     'kGeminiStatus'),
+    validateApiKey('groq',       keys.groq,       'kGroqStatus'),
+    validateApiKey('mistral',    keys.mistral,    'kMistralStatus'),
+    validateApiKey('openrouter', keys.openrouter, 'kOpenRouterStatus'),
+  ]);
+  initModelChips();
+  showToast('Keys saved');
+}
+
+async function validateApiKey(prov, key, statusId) {
+  const el = document.getElementById(statusId);
+  if (!el) return;
+  if (!key) { el.textContent=''; return; }
+  el.textContent='⏳'; el.style.color='var(--fg3)';
+  try {
+    let ok=false;
+    if (prov==='groq')       { const r=await fetch('https://api.groq.com/openai/v1/models',{headers:{'Authorization':'Bearer '+key}}); ok=r.ok; }
+    else if (prov==='gemini'){ const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`); ok=r.ok; }
+    else if (prov==='mistral'){ const r=await fetch('https://api.mistral.ai/v1/models',{headers:{'Authorization':'Bearer '+key}}); ok=r.ok; }
+    else if (prov==='openrouter'){ const r=await fetch('https://openrouter.ai/api/v1/models',{headers:{'Authorization':'Bearer '+key}}); ok=r.ok; }
+    el.textContent=ok?'✓ Valid':'✗ Invalid'; el.style.color=ok?'var(--green)':'var(--red)';
+  } catch { el.textContent='✗ Error'; el.style.color='var(--red)'; }
+}
+
+function loadKeys() {
+  const g=localStorage.getItem('spert_g')||'', gr=localStorage.getItem('spert_gr')||'';
+  const m=localStorage.getItem('spert_m')||'', o=localStorage.getItem('spert_o')||'';
+  const kG=document.getElementById('kGemini');    if(kG) kG.value=g;
+  const kGr=document.getElementById('kGroq');     if(kGr) kGr.value=gr;
+  const kM=document.getElementById('kMistral');   if(kM) kM.value=m;
+  const kO=document.getElementById('kOpenRouter');if(kO) kO.value=o;
+  sbUrl=localStorage.getItem('spert_sbUrl')||'';
+  sbKey=localStorage.getItem('spert_sbKey')||'';
+  const sbUrlEl=document.getElementById('sbUrl'); if(sbUrlEl&&sbUrl) sbUrlEl.value=sbUrl;
+  const sbKeyEl=document.getElementById('sbKey'); if(sbKeyEl&&sbKey) sbKeyEl.value=sbKey;
+}
+
+function getKeys() {
+  return {
+    gemini:     (localStorage.getItem('spert_g')||'').trim(),
+    groq:       (localStorage.getItem('spert_gr')||'').trim(),
+    mistral:    (localStorage.getItem('spert_m')||'').trim(),
+    openrouter: (localStorage.getItem('spert_o')||'').trim(),
+  };
+}
+
+function saveGhLocally() {
+  const t=document.getElementById('ghToken')?.value||'';
+  const r=document.getElementById('ghRepo')?.value.trim()||'';
+  const f=document.getElementById('ghFile')?.value.trim()||'index.html';
+  if(t) localStorage.setItem('spert_ghToken', t);
+  if(r) localStorage.setItem('spert_ghRepo',  r);
+  localStorage.setItem('spert_ghFile', f);
+}
+
+function loadGhLocally() {
+  const t=localStorage.getItem('spert_ghToken')||'';
+  const r=localStorage.getItem('spert_ghRepo')||'';
+  const f=localStorage.getItem('spert_ghFile')||'';
+  if (document.getElementById('ghToken')) document.getElementById('ghToken').value=t;
+  if (document.getElementById('ghRepo'))  document.getElementById('ghRepo').value=r;
+  if (document.getElementById('ghFile'))  document.getElementById('ghFile').value=f;
+}
+
+async function testGitHub() {
+  const token = document.getElementById('ghToken').value.trim();
+  const repo  = document.getElementById('ghRepo').value.trim();
+  const file  = document.getElementById('ghFile').value.trim() || 'index.html';
+  const btn   = document.getElementById('ghTestBtn');
+  const el    = document.getElementById('ghStatus');
+  el.style.display='block'; el.style.color='var(--fg3)'; el.textContent='Testing…';
+  btn.disabled=true;
+  if (!token||!repo) { el.textContent='Fill in token and repo first.'; el.style.color='var(--amber)'; btn.disabled=false; return; }
+  if (!repo.includes('/')) { el.textContent='Repo must be username/repo-name'; el.style.color='var(--amber)'; btn.disabled=false; return; }
+  try {
+    el.textContent='Checking repo…';
+    const repoRes = await fetch(`https://api.github.com/repos/${repo}`,
+      {headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+    if (repoRes.status===401) throw new Error('Token invalid or expired');
+    if (repoRes.status===403) throw new Error('Token lacks permission — check repo scope');
+    if (repoRes.status===404) throw new Error('Repo not found — check username/repo-name');
+    if (!repoRes.ok) throw new Error('GitHub API error: HTTP '+repoRes.status);
+    const repoData = await repoRes.json();
+    el.textContent='Checking file exists…';
+    const fileRes = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`,
+      {headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+    if (fileRes.status===404) { el.textContent=`⚠ Repo OK but file "${file}" not found`; el.style.color='var(--amber)'; btn.disabled=false; return; }
+    if (!fileRes.ok) throw new Error('Cannot read file: HTTP '+fileRes.status);
+    const fileData = await fileRes.json();
+    el.textContent='Verifying write permission…';
+    const testPut = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`, {
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
+      body: JSON.stringify({message:'Spert connection test', content:fileData.content.replace(/\n/g,''), sha:fileData.sha})
+    });
+    if (testPut.status===403||testPut.status===422) throw new Error('Token cannot write — check repo scope');
+    if (!testPut.ok && testPut.status!==200) throw new Error('Write test failed: HTTP '+testPut.status);
+    el.textContent=`✓ Connected to ${repoData.full_name} · "${file}" writable`;
+    el.style.color='var(--green)';
+    saveGhLocally(); syncToCloud();
+  } catch(e) { el.textContent='✗ '+e.message; el.style.color='var(--red)'; }
+  btn.disabled=false;
+}
+
+async function testGitHubPush() {
+  const token=localStorage.getItem('spert_ghToken')||document.getElementById('ghToken').value.trim();
+  const repo=localStorage.getItem('spert_ghRepo')||document.getElementById('ghRepo').value.trim();
+  const file=localStorage.getItem('spert_ghFile')||document.getElementById('ghFile').value.trim()||'index.html';
+  const el=document.getElementById('ghStatus');
+  el.style.display='block'; el.style.color='var(--fg3)'; el.textContent='Running push test…';
+  try {
+    const getRes=await fetch(`https://api.github.com/repos/${repo}/contents/${file}`,
+      {headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+    if (!getRes.ok) throw new Error('Cannot read file: HTTP '+getRes.status);
+    const d=await getRes.json();
+    const decoded=decodeURIComponent(escape(atob(d.content.replace(/\n/g,''))));
+    const patched=decoded.replace('<!-- spert-test-marker -->','').trimEnd()+'\n<!-- spert-test-marker -->';
+    const encoded=htmlToBase64(patched);
+    const putRes=await fetch(`https://api.github.com/repos/${repo}/contents/${file}`,{
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
+      body:JSON.stringify({message:'Spert push test — '+new Date().toISOString(), content:encoded, sha:d.sha})
+    });
+    if (!putRes.ok) { const e=await putRes.json(); throw new Error(e.message||'Push failed: HTTP '+putRes.status); }
+    el.textContent='✓ Push test succeeded! Cloudflare Pages deploy should have started.';
+    el.style.color='var(--green)';
+  } catch(e) { el.textContent='✗ Push failed: '+e.message; el.style.color='var(--red)'; }
+}
+
+function htmlToBase64(html) {
+  const bytes = new TextEncoder().encode(html);
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
+async function pushToGitHub(html) {
+  const token=localStorage.getItem('spert_ghToken')||'';
+  const repo=localStorage.getItem('spert_ghRepo')||'';
+  const file=localStorage.getItem('spert_ghFile')||'index.html';
+  if (!token||!repo) throw new Error('GitHub not configured — go to Settings → GitHub Auto-Deploy');
+  const getRes = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`,
+    {headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json'}});
+  if (getRes.status===401) throw new Error('GitHub token expired — update it in Settings');
+  if (getRes.status===404) throw new Error(`File "${file}" not found in repo "${repo}"`);
+  if (!getRes.ok) throw new Error('GitHub read failed: HTTP '+getRes.status);
+  const fileData = await getRes.json();
+  const encoded = htmlToBase64(html);
+  const putRes = await fetch(`https://api.github.com/repos/${repo}/contents/${file}`, {
+    method:'PUT',
+    headers:{'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
+    body: JSON.stringify({message: 'Spert upgrade — '+new Date().toLocaleString(), content: encoded, sha: fileData.sha})
+  });
+  if (putRes.status===403) throw new Error('Token lacks write permission — check repo scope in Settings');
+  if (!putRes.ok) { const e = await putRes.json(); throw new Error('Push failed: '+(e.message||'HTTP '+putRes.status)); }
+  return true;
+}
+
+/* ═══════════════════════════════════
+   THEMES & ART
+═══════════════════════════════════ */
+const THEMES = [
+  {id:'default', name:'Default', bg:'#09090b', acc:'#f97316'},
+  {id:'ocean',   name:'Ocean',   bg:'#040d18', acc:'#38bdf8'},
+  {id:'forest',  name:'Forest',  bg:'#030f08', acc:'#4ade80'},
+  {id:'violet',  name:'Violet',  bg:'#0a040f', acc:'#c084fc'},
+  {id:'crimson', name:'Crimson', bg:'#0f0406', acc:'#f43f5e'},
+  {id:'gold',    name:'Gold',    bg:'#0d0b04', acc:'#fbbf24'},
+  {id:'light',   name:'Light',   bg:'#f8f9fa', acc:'#f97316'},
+];
+
+let currentTheme = 'default';
+let artMode = 'none';
+let animArt = false;
+let artAnimId = null;
+
+function applyTheme(id, save=true) {
+  currentTheme = id;
+  localStorage.setItem('spert_theme', id);
+  document.body.className = document.body.className.replace(/theme-\w+/g,'').trim();
+  document.body.classList.add('theme-'+(id==='default'?'default':id));
+  document.querySelectorAll('.theme-swatch').forEach(s=>s.classList.toggle('active',s.dataset.t===id));
+  if (save) syncToCloud();
+}
+
+function setBrightness(val) {
+  document.body.classList.remove('dim-25','dim-50');
+  if (val < 60) document.body.classList.add('dim-50');
+  else if (val < 80) document.body.classList.add('dim-25');
+  document.getElementById('brightLbl').textContent = val+'%';
+}
+
+const ART_MODES = [
+  {id:'none',  name:'None',      draw:null},
+  {id:'geo',   name:'Geometric', draw:drawGeo},
+  {id:'waves', name:'Waves',     draw:drawWaves},
+  {id:'stars', name:'Stars',     draw:drawStars},
+  {id:'grid',  name:'Grid',      draw:drawGrid},
+  {id:'flow',  name:'Flow',      draw:drawFlow},
+];
+
+function applyArt(id) {
+  artMode=id;
+  document.querySelectorAll('.art-option').forEach(a=>a.classList.toggle('active',a.dataset.a===id));
+  cancelAnimationFrame(artAnimId);
+  const canvas=document.getElementById('artCanvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const mode=ART_MODES.find(m=>m.id===id);
+  if (!mode||!mode.draw) return;
+  if (animArt) { animateArt(mode.draw); } else { mode.draw(ctx, canvas.width, canvas.height, 0); }
+}
+
+function animateArt(drawFn) {
+  const canvas=document.getElementById('artCanvas');
+  const ctx=canvas.getContext('2d');
+  let t=0;
+  function frame() {
+    canvas.width=window.innerWidth; canvas.height=window.innerHeight;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drawFn(ctx,canvas.width,canvas.height,t);
+    t+=0.5;
+    artAnimId=requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function toggleAnimArt() {
+  animArt=document.getElementById('animArtToggle').classList.contains('on');
+  applyArt(artMode);
+}
+
+const ACC = () => getComputedStyle(document.body).getPropertyValue('--accent').trim()||'#f97316';
+function drawGeo(ctx,w,h,t){ctx.strokeStyle=ACC();ctx.lineWidth=.5;for(let i=0;i<8;i++){const x=w*.1+i*(w*.1),y=h*.2+Math.sin((t+i)*0.03)*h*.1;ctx.beginPath();ctx.arc(x+t*.2%w,y,30+i*10,0,Math.PI*2);ctx.stroke();}}
+function drawWaves(ctx,w,h,t){ctx.strokeStyle=ACC();ctx.lineWidth=1;for(let y=0;y<h;y+=40){ctx.beginPath();for(let x=0;x<w;x+=4){ctx.lineTo(x,y+Math.sin((x+t)*0.02)*20);}ctx.stroke();}}
+function drawStars(ctx,w,h,t){ctx.fillStyle=ACC();for(let i=0;i<80;i++){const x=(i*137.5*3)%w,y=(i*97.3+t*0.1)%h;const s=Math.sin((i+t*0.05))*1+1.5;ctx.beginPath();ctx.arc(x,y,s,0,Math.PI*2);ctx.fill();}}
+function drawGrid(ctx,w,h,t){ctx.strokeStyle=ACC();ctx.lineWidth=.3;const sp=60;for(let x=0;x<w;x+=sp){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}for(let y=0;y<h;y+=sp){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}}
+function drawFlow(ctx,w,h,t){ctx.strokeStyle=ACC();ctx.lineWidth=.8;for(let i=0;i<12;i++){ctx.beginPath();for(let x=0;x<w;x+=8){const y=h/2+Math.sin((x*0.005+t*0.02+i*0.5))*h*0.15+i*(h/14);x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}ctx.stroke();}}
+
+function initThemeGrid() {
+  const g=document.getElementById('themeGrid');
+  THEMES.forEach(t=>{
+    const s=document.createElement('div'); s.className='theme-swatch'+(t.id===currentTheme?' active':''); s.dataset.t=t.id;
+    s.innerHTML=`<div class="swatch-circle" style="background:${t.bg};border:2px solid ${t.acc}"><span style="color:${t.acc};font-size:10px">A</span></div><div class="swatch-name">${t.name}</div>`;
+    s.onclick=()=>applyTheme(t.id);
+    g.appendChild(s);
+  });
+}
+
+function initArtGrid() {
+  const g=document.getElementById('artGrid');
+  ART_MODES.forEach(a=>{
+    const el=document.createElement('div'); el.className='art-option'+(a.id===artMode?' active':''); el.dataset.a=a.id;
+    const prev=document.createElement('canvas'); prev.width=80; prev.height=48; prev.className='art-preview';
+    prev.style.background='var(--bg2)';
+    if (a.draw) { const ctx=prev.getContext('2d'); ctx.strokeStyle='#888'; ctx.fillStyle='#888'; a.draw(ctx,80,48,0); }
+    el.innerHTML=`<div class="art-name">${a.name}</div>`;
+    el.insertBefore(prev,el.firstChild);
+    el.onclick=()=>applyArt(a.id);
+    g.appendChild(el);
+  });
+}
+
+/* ═══════════════════════════════════
+   STATE
+═══════════════════════════════════ */
+let selectedVoice='neutral';
+let passes=1;
+let chatHistory=[];
+let currentSessionMsgs=[];
+let attachedFiles=[];
+let projects=[];
+let apps=[];
+let upgradeConv=[];
+let upgradeRetryCount=0;
+let currentOpenApp=null;
+
+let usageLog = JSON.parse(localStorage.getItem('spert_usageLog')||'[]');
+const PROVIDER_LIMITS = {
+  groq:       {rpm:30,  tpm:6000,   rpd:14400, label:'Groq Free'},
+  gemini:     {rpm:15,  tpm:1000000,rpd:1500,  label:'Gemini Free'},
+  mistral:    {rpm:1,   tpm:500000, rpd:null,  label:'Mistral Free'},
+  openrouter: {rpm:20,  tpm:200000, rpd:null,  label:'OpenRouter Free'},
+};
+
+const VOICES={
+  neutral:'Write in a clear, balanced, professional tone.',
+  academic:'Write in a formal academic tone with precise, evidence-based reasoning.',
+  journalist:'Write in a sharp journalistic style. Lead with the key info. Active voice.',
+  casual:'Write in a friendly, conversational tone — like explaining to a smart friend.',
+  executive:'Write in a concise executive style. Get to the point immediately.'
+};
+
+/* ═══════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════ */
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (id==='upgrade') setTimeout(()=>document.getElementById('upgradeInput')?.focus(),100);
+}
+
+function toggleModePanel() { document.getElementById('modePanel').classList.toggle('open'); }
+
+/* ═══════════════════════════════════
+   MODEL CATALOG
+═══════════════════════════════════ */
+const MODELS=[
+  {id:'gq-l70',   prov:'groq',       mid:'llama-3.3-70b-versatile',           tags:['speed','quality'],  q:8, s:10, primary:true,  label:'Llama 3.3 70B'},
+  {id:'gq-l8',    prov:'groq',       mid:'llama-3.1-8b-instant',              tags:['speed'],            q:6, s:10, primary:false, label:'Llama 3.1 8B'},
+  {id:'gq-ds',    prov:'groq',       mid:'deepseek-r1-distill-llama-70b',     tags:['reason','speed'],   q:8, s:9,  primary:false, label:'DeepSeek R1'},
+  {id:'gq-qwq',   prov:'groq',       mid:'qwen-qwq-32b',                      tags:['reason'],           q:8, s:8,  primary:false, label:'QwQ 32B'},
+  {id:'gem-f25',  prov:'gemini',     mid:'gemini-2.5-flash',                  tags:['quality','search'], q:9, s:7,  primary:true,  label:'Gemini 2.5 Flash'},
+  {id:'gem-f2',   prov:'gemini',     mid:'gemini-2.0-flash',                  tags:['speed','search'],   q:8, s:9,  primary:false, label:'Gemini 2.0 Flash'},
+  {id:'mis-sm',   prov:'mistral',    mid:'mistral-small-latest',              tags:['speed','quality'],  q:7, s:7,  primary:true,  label:'Mistral Small'},
+  {id:'mis-cd',   prov:'mistral',    mid:'codestral-latest',                  tags:['code'],             q:9, s:6,  primary:false, label:'Codestral'},
+  {id:'or-llama', prov:'openrouter', mid:'meta-llama/llama-3.3-70b-instruct:free', tags:['speed','quality'], q:8, s:6, primary:true, label:'Llama 3.3 (OR)'},
+  {id:'or-r1',    prov:'openrouter', mid:'deepseek/deepseek-r1:free',         tags:['reason','quality'], q:9, s:5,  primary:false, label:'DeepSeek R1 (OR)'},
+  {id:'or-v3',    prov:'openrouter', mid:'deepseek/deepseek-v3:free',         tags:['quality'],          q:9, s:5,  primary:false, label:'DeepSeek V3 (OR)'},
+];
+
+let selectedModels=new Set(MODELS.map(m=>m.id));
+let currentSessionId = Date.now();
+
+async function callModel(model, system, user, useSearch, maxTok=4000, onChunk=null) {
+  const keys=getKeys();
+  const key=keys[model.prov];
+  if (!key) throw new Error('No key for '+model.prov);
+  const callStart = Date.now();
+
+  if (model.prov==='gemini') {
+    const url=`https://generativelanguage.googleapis.com/v1beta/models/${model.mid}:generateContent?key=${encodeURIComponent(key)}`;
+    const body={system_instruction:{parts:[{text:system}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{maxOutputTokens:maxTok,temperature:0.3}};
+    const wsOn=document.getElementById('wsToggle')?.classList.contains('on');
+    if (useSearch&&wsOn&&model.tags.includes('search')) body.tools=[{google_search:{}}];
+    const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await res.json(); if(d.error)throw new Error('Gemini: '+d.error.message);
+    const text = d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+    logUsage({provider:'gemini', model:model.mid, tokensIn:Math.ceil((system.length+user.length)/4), tokensOut:Math.ceil(text.length/4), ts:callStart});
+    return text;
+  }
+
+  if (model.prov==='groq') {
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body:JSON.stringify({model:model.mid,max_tokens:Math.min(maxTok,8000),temperature:0.3,stream:true,
+        messages:[{role:'system',content:system},{role:'user',content:user}]})
+    });
+    if (!res.ok) { const e=await res.json(); throw new Error('Groq: '+(e.error?.message||res.status)); }
+    const rlHeaders={
+      remaining:parseInt(res.headers.get('x-ratelimit-remaining-requests')||'-1'),
+      remainingTokens:parseInt(res.headers.get('x-ratelimit-remaining-tokens')||'-1'),
+      reset:res.headers.get('x-ratelimit-reset-requests')||null,
+      resetTokens:res.headers.get('x-ratelimit-reset-tokens')||null,
+      limitRPM:parseInt(res.headers.get('x-ratelimit-limit-requests')||'-1'),
+      limitTPM:parseInt(res.headers.get('x-ratelimit-limit-tokens')||'-1'),
+    };
+    const reader=res.body.getReader(); const dec=new TextDecoder();
+    let full=''; let buf='';
+    while(true){
+      const {done,value}=await reader.read(); if(done) break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n'); buf=lines.pop()||'';
+      for(const line of lines){
+        if(!line.startsWith('data: ')) continue;
+        const data=line.slice(6).trim(); if(data==='[DONE]') continue;
+        try{
+          const j=JSON.parse(data);
+          const delta=j.choices?.[0]?.delta?.content||'';
+          if(delta){ full+=delta; if(onChunk) onChunk(full); }
+        }catch{}
+      }
+    }
+    logUsage({provider:'groq',model:model.mid,tokensIn:Math.ceil((system.length+user.length)/4),tokensOut:Math.ceil(full.length/4),
+      rateLimitRemaining:rlHeaders.remaining,rateLimitRemainingTokens:rlHeaders.remainingTokens,
+      rateLimitReset:rlHeaders.reset,rateLimitResetTokens:rlHeaders.resetTokens,
+      rateLimitRPM:rlHeaders.limitRPM,rateLimitTPM:rlHeaders.limitTPM,ts:callStart});
+    return full;
+  }
+
+  if (model.prov==='mistral') {
+    const res=await fetch('https://api.mistral.ai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:model.mid,max_tokens:maxTok,temperature:0.3,messages:[{role:'system',content:system},{role:'user',content:user}]})});
+    const d=await res.json(); if(d.error)throw new Error('Mistral: '+d.error.message);
+    const text=d.choices?.[0]?.message?.content||'';
+    logUsage({provider:'mistral',model:model.mid,tokensIn:d.usage?.prompt_tokens||Math.ceil((system.length+user.length)/4),tokensOut:d.usage?.completion_tokens||Math.ceil(text.length/4),ts:callStart});
+    return text;
+  }
+
+  if (model.prov==='openrouter') {
+    const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://spert.app','X-Title':'Spert'},body:JSON.stringify({model:model.mid,max_tokens:maxTok,temperature:0.3,messages:[{role:'system',content:system},{role:'user',content:user}]})});
+    const d=await res.json(); if(d.error)throw new Error('OR: '+d.error.message);
+    const text=d.choices?.[0]?.message?.content||'';
+    logUsage({provider:'openrouter',model:model.mid,tokensIn:d.usage?.prompt_tokens||Math.ceil((system.length+user.length)/4),tokensOut:d.usage?.completion_tokens||Math.ceil(text.length/4),ts:callStart});
+    return text;
+  }
+}
+
+async function callBestModel(system, user, useSearch=true, maxTok=4000, onChunk=null) {
+  const keys=getKeys();
+  const avail=MODELS.filter(m=>selectedModels.has(m.id)&&keys[m.prov]);
+  if (!avail.length) {
+    const hasKeys=Object.values(keys).some(k=>k);
+    throw new Error(hasKeys
+      ? 'No models selected. Go to Settings → Models and enable at least one.'
+      : 'No API key found. Go to Settings and paste your Groq key (free at console.groq.com).');
+  }
+  const primary=avail.filter(m=>m.primary);
+  const fallback=avail.filter(m=>!m.primary);
+  const sort=(arr)=>onChunk ? arr.sort((a,b)=>b.s-a.s) : arr.sort((a,b)=>b.q-a.q);
+  const ordered=[...sort(primary), ...sort(fallback)];
+  const errors=[];
+  for (const m of ordered) {
+    try { return await callModel(m,system,user,useSearch,maxTok,onChunk); }
+    catch(e) { errors.push(`${m.label}: ${e.message}`); }
+  }
+  const errSummary=errors.slice(0,3).join(' | ');
+  throw new Error('All models failed. '+errSummary);
+}
+
+/* ═══════════════════════════════════
+   SELF FACT-CHECK
+═══════════════════════════════════ */
+async function factCheckSelf(response, maxRetries=1) {
+  // FIX: safe element read — never crash if mode panel is hidden
+  const fcEl = document.getElementById('fcToggle');
+  const fcOn = fcEl ? fcEl.classList.contains('on') : false;
+  // FIX: default OFF, skip for long responses to save Groq quota
+  if (!fcOn) return {text:response, badge:'off'};
+  if (response.length > 6000) return {text:response, badge:'off'};
+  const fcSystem='You are a fact-checker. If this AI response is accurate, reply only: VERIFIED\nIf there are clear factual errors, reply with the corrected version only.';
+  let current=response;
+  for (let i=0;i<maxRetries;i++) {
+    try {
+      const check=await callBestModel(fcSystem, 'CHECK:\n'+current, false, 2000, null);
+      if (check.trim().toUpperCase().startsWith('VERIFIED')) return {text:current, badge:'pass'};
+      current=check;
+    } catch { break; }
+  }
+  return {text:current, badge:'warn'};
+}
+
+/* ═══════════════════════════════════
+   MAIN AI CHAT
+═══════════════════════════════════ */
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.max(46,Math.min(el.scrollHeight,180))+'px'; }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function formatMd(text) {
+  return esc(text)
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`([^`]+)`/g,'<code style="font-family:var(--fm);font-size:11.5px;background:var(--bg3);border-radius:4px;padding:1px 5px">$1</code>')
+    .replace(/\n\n/g,'</p><p style="margin-top:8px">')
+    .replace(/\n/g,'<br>');
+}
+
+function addMsg(role, html, meta='', badge=null) {
+  const empty=document.getElementById('chatEmpty');
+  if (empty) empty.remove();
+  const hist=document.getElementById('chatHistory');
+  const div=document.createElement('div'); div.className='msg '+role;
+  let badgeHtml='';
+  if (badge&&badge!=='off') badgeHtml=`<span class="fc-badge ${badge}">${badge==='pass'?'✓ Fact-checked':badge==='warn'?'⚠ Reviewed':'✗ Check failed'}</span>`;
+  div.innerHTML=`<div class="msg-bubble"><p>${html}</p>${badgeHtml}</div>${meta?`<div class="msg-meta">${esc(meta)}</div>`:''}`;
+  hist.appendChild(div); hist.scrollTop=hist.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const hist=document.getElementById('chatHistory');
+  const div=document.createElement('div'); div.className='msg ai'; div.id='typing';
+  div.innerHTML=`<div class="msg-bubble"><span class="spin"></span> Thinking…</div>`;
+  hist.appendChild(div); hist.scrollTop=hist.scrollHeight;
+  return div;
+}
+
+function updateTyping(html, badge=null) {
+  // FIX: guard — typing div may be gone if user started new chat mid-stream
+  const t=document.getElementById('typing');
+  if (!t) return;
+  let badgeHtml='';
+  if (badge&&badge!=='off') badgeHtml=`<span class="fc-badge ${badge}">${badge==='pass'?'✓ Fact-checked':badge==='warn'?'⚠ Reviewed':''}</span>`;
+  t.querySelector('.msg-bubble').innerHTML=`<p>${html}</p>${badgeHtml}`;
+  // Keep scrolled to bottom during streaming
+  const hist=document.getElementById('chatHistory');
+  if (hist) hist.scrollTop=hist.scrollHeight;
+  t.id='';  // clear id so next updateTyping call for a different message doesn't land here
+}
+
+async function sendMessage() {
+  const input=document.getElementById('mainInput');
+  const text=input.value.trim();
+  if (!text) return;
+  document.getElementById('sendBtn').disabled=true;
+  addMsg('user', formatMd(text));
+  input.value=''; input.style.height='auto';
+  localStorage.removeItem('spert_draft_mainDraft');
+
+  // Build file context
+  let fullPrompt=text;
+  for (const f of attachedFiles) {
+    if (f.type==='text/plain'||f.name.endsWith('.md')) {
+      try { fullPrompt+='\n\n[FILE: '+f.name+']\n'+await readFileAsText(f); } catch {}
+    }
+  }
+
+  const typingDiv = addTyping();
+
+  try {
+    const system=`You are Spert, a highly capable AI multitool. ${VOICES[selectedVoice]}
+You can help with anything: research, writing, coding, data analysis, creating web apps, 3D viewers, tools, and more.
+When asked to build an app or tool, write complete self-contained HTML+JS+CSS code.
+Always be accurate. If uncertain, say so. Today's date: ${new Date().toLocaleDateString()}.`;
+
+    // FIX: Stream for ALL prompt lengths — cursor stripped before final render
+    const streamCb = (partial) => {
+      // Re-assign id so updateTyping can still find it during streaming
+      if (!document.getElementById('typing') && typingDiv) typingDiv.id = 'typing';
+      updateTyping(formatMd(partial) + '<span style="opacity:.3;font-size:.85em">▊</span>');
+      // updateTyping clears the id each call, so we reassign it for the next chunk
+      if (typingDiv) typingDiv.id = 'typing';
+    };
+
+    const response = await callWithConsensus(system, fullPrompt, true, 4000, streamCb);
+
+    // FIX: Strip streaming cursor before fact-check and final render
+    const cleanResponse = response.replace(/<span[^>]*>▊<\/span>/g, '').trim();
+
+    // Restore typing id for final updateTyping call
+    if (typingDiv) typingDiv.id = 'typing';
+    const {text:finalText, badge} = await factCheckSelf(cleanResponse);
+
+    // Check if response contains a full HTML app
+    const hasApp = finalText.includes('<!DOCTYPE html>') || (finalText.includes('<html') && finalText.includes('</html>'));
+    if (hasApp) {
+      const appCode = finalText.match(/<!DOCTYPE html>[\s\S]*?<\/html>/i)?.[0] || finalText;
+      const appName = 'App — '+text.substring(0,30)+'…';
+      saveApp({name:appName, code:appCode, desc:text, created:new Date().toISOString()});
+      if (typingDiv) typingDiv.id = 'typing';
+      updateTyping(formatMd('I\'ve built that app and saved it to your **Apps** tab. You can open and use it there.')+`<br><button onclick="showTab('apps',document.querySelectorAll('.nav-tab')[3]);this.closest('.msg').style.opacity='.6'" style="margin-top:8px;padding:6px 14px;font-size:12px;font-weight:600;border:none;border-radius:var(--r);background:var(--accent);color:#fff;cursor:pointer">Open Apps →</button>`, badge);
+    } else {
+      if (typingDiv) typingDiv.id = 'typing';
+      updateTyping(formatMd(finalText), badge);
+    }
+
+    currentSessionMsgs.push({role:'user',text},{role:'ai',text:finalText,badge});
+  } catch(e) {
+    const msg = e.message||'Unknown error';
+    const isKeyErr = msg.toLowerCase().includes('no api key') || msg.toLowerCase().includes('no key');
+    const isRateErr = msg.toLowerCase().includes('rate limit') || msg.toLowerCase().includes('429') || msg.toLowerCase().includes('tpm') || msg.toLowerCase().includes('rpm');
+    let html = `<span style="color:var(--red)"><strong>Error:</strong> ${esc(msg)}</span>`;
+    if (isKeyErr) html += `<br><small style="color:var(--fg3)">→ Open <strong>Settings</strong> and paste your Groq API key (free at <a href="https://console.groq.com" target="_blank" style="color:var(--accent)">console.groq.com</a>)</small>`;
+    if (isRateErr) html += `<br><small style="color:var(--fg3)">→ Rate limit hit — wait ~60 seconds and try again, or add a Gemini key in Settings for extra capacity</small>`;
+    if (typingDiv) typingDiv.id = 'typing';
+    updateTyping(html);
+  }
+  document.getElementById('sendBtn').disabled=false;
+  attachedFiles=[];
+  document.getElementById('fileChips').innerHTML='';
+}
+
+function quickPrompt(text) {
+  document.getElementById('mainInput').value=text;
+  document.getElementById('mainInput').focus();
+  autoResize(document.getElementById('mainInput'));
+}
+
+function newChat() {
+  if (currentSessionMsgs.length) {
+    const sessionId = currentSessionId || Date.now();
+    if (!chatHistory.find(h=>h.id===sessionId)) {
+      chatHistory.push({id:sessionId,msgs:currentSessionMsgs,preview:currentSessionMsgs[0]?.text?.substring(0,60)||'Chat',date:new Date().toISOString()});
+      syncToCloud();
+    }
+  }
+  currentSessionMsgs=[];
+  currentSessionId=Date.now();
+  const hist = document.getElementById('chatHistory');
+  hist.innerHTML=`<div class="chat-empty" id="chatEmpty">
+    <div class="chat-empty-title">What can I help you <em>build</em>?</div>
+    <div class="chat-empty-sub">Ask me anything — research, writing, code, analysis, 3D models, data tools, or anything else.</div>
+    <div class="quick-chips">
+      <div class="qchip" onclick="quickPrompt('Research and summarize the latest AI developments')">📰 Research AI news</div>
+      <div class="qchip" onclick="quickPrompt('Write a professional email about')">✉️ Draft an email</div>
+      <div class="qchip" onclick="quickPrompt('Build me a web app that')">🛠 Build an app</div>
+      <div class="qchip" onclick="quickPrompt('Analyze this data and create a visualization:')">📊 Analyze data</div>
+      <div class="qchip" onclick="quickPrompt('Create a 3D model viewer for')">🎲 3D model</div>
+      <div class="qchip" onclick="quickPrompt('Fact-check this text:')">✅ Fact-check</div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════
+   FILES
+═══════════════════════════════════ */
+function handleFiles(files) {
+  Array.from(files).forEach(f=>{
+    attachedFiles.push(f);
+    const c=document.createElement('div'); c.className='fchip2';
+    c.innerHTML=`${f.type.startsWith('image/')?'🖼':'📄'} ${esc(f.name)} <span class="rm" onclick="removeFile('${esc(f.name)}',this)">×</span>`;
+    document.getElementById('fileChips').appendChild(c);
+  });
+}
+function removeFile(name, el) { attachedFiles=attachedFiles.filter(f=>f.name!==name); el.closest('.fchip2').remove(); }
+function readFileAsText(f) { return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsText(f); }); }
+
+/* ═══════════════════════════════════
+   UPGRADE TAB
+═══════════════════════════════════ */
+function addUpgradeMsg(role, html, id=null) {
+  const chat=document.getElementById('upgradeChat');
+  const div=document.createElement('div'); div.className='umsg '+role;
+  if (id) div.id=id;
+  div.innerHTML=html;
+  chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
+  return div;
+}
+
+async function sendUpgrade() {
+  const input=document.getElementById('upgradeInput');
+  const text=input.value.trim();
+  if (!text) return;
+  const keys=getKeys();
+  const key=keys.groq||keys.gemini||keys.mistral||keys.openrouter;
+  if (!key) { addUpgradeMsg('ai','<strong style="color:var(--red)">No API key found.</strong> Go to Settings and add at least one key.'); return; }
+
+  addUpgradeMsg('user', esc(text));
+  upgradeConv.push({role:'user',content:text});
+  upgradeRetryCount=0;
+  input.value=''; input.style.height='auto';
+  localStorage.removeItem('spert_draft_upgradeDraft');
+  document.getElementById('upgradeSend').disabled=true;
+
+  const thinkId='think_'+Date.now();
+  addUpgradeMsg('ai','<span class="spin"></span> Thinking…', thinkId);
+
+  let dotCount=0;
+  const thinkTimer=setInterval(()=>{
+    const el=document.getElementById(thinkId);
+    if(!el){clearInterval(thinkTimer);return;}
+    dotCount=(dotCount+1)%4;
+    el.innerHTML='<span class="spin"></span> Thinking'+'...'.slice(0,dotCount+1);
+  },600);
+
+  const fullJs = (() => {
+    const scripts = document.querySelectorAll('script');
+    for (const s of scripts) if (s.textContent.length > 1000) return s.textContent;
+    return '';
+  })();
+
+  const fnMap = {};
+  fullJs.replace(/(?:async\s+)?function\s+(\w+)\s*\([^)]*\)\s*\{/g, (m, name, offset) => {
+    const slice = fullJs.slice(offset);
+    const lines = slice.split('\n').slice(0, 60).join('\n');
+    fnMap[name] = lines;
+  });
+
+  const alwaysInclude = ['sendMessage','sendUpgrade','callBestModel','callModel','applySelectedChanges','getKeys','syncToCloud','showToast'];
+  const userWords = text.toLowerCase();
+  const conditionalInclude = Object.keys(fnMap).filter(name =>
+    userWords.includes(name.toLowerCase()) ||
+    userWords.includes(name.toLowerCase().replace(/([A-Z])/g,' $1').trim())
+  );
+  const toInclude = [...new Set([...alwaysInclude, ...conditionalInclude])];
+  const srcExcerpt = toInclude
+    .filter(name => fnMap[name])
+    .map(name => `// === ${name} ===\n${fnMap[name]}\n`)
+    .join('\n');
+
+  const fnIndex = Object.keys(fnMap).join(', ');
+
+  const system=`You are Spert's upgrade assistant. You are modifying a single-file HTML web app.
+
+AVAILABLE FUNCTIONS (full index): ${fnIndex}
+
+KEY FUNCTION SOURCE (most relevant to this request):
+${srcExcerpt.slice(0, 8000)}
+
+PATCH RULES:
+- Prefix new vars/functions: patch_X_
+- No import/export. Guard DOM: const el=document.getElementById('x');if(!el)return;
+- Override existing: window.fnName = function(){...}
+- Globals available: chatHistory, currentSessionMsgs, syncToCloud, showToast, formatMd, esc, getKeys, MODELS, selectedModels
+
+OUTPUT — always end with valid JSON patch block:
+<patch>
+{"changes":[{"id":"c1","label":"label","detail":"detail","css":"","js":""}]}
+</patch>
+Escape quotes as \\" newlines as \\n. Chatting only = no patch block.`;
+
+  try {
+    const response = await callUpgradeModel(system, upgradeConv, keys);
+    upgradeConv.push({role:'assistant', content:response});
+
+    const patchMatch = response.match(/<patch>([\s\S]*?)<\/patch>/);
+    const convo = response.replace(/<patch>[\s\S]*?<\/patch>/,'').trim();
+    let patch = null;
+    if (patchMatch) {
+      try { patch = JSON.parse(patchMatch[1].trim()); }
+      catch(e) {
+        try { patch = JSON.parse(patchMatch[1].replace(/```json|```/g,'').trim()); } catch {}
+        if (!patch) console.warn('Patch parse failed:', e, '\nRaw:', patchMatch[1]);
+      }
+    }
+
+    const thinkEl = document.getElementById(thinkId);
+    clearInterval(thinkTimer);
+    if (thinkEl) thinkEl.remove();
+
+    let html=`<div style="line-height:1.7;padding-bottom:${patch?'12px':'0'};border-bottom:${patch?'1px solid var(--bg3)':'none'};margin-bottom:${patch?'12px':'0'}">${formatMd(convo)}</div>`;
+
+    if (patch && patch.changes && patch.changes.length) {
+      const patchId='patch_'+Date.now();
+      window[patchId]=patch;
+      html+=`<div class="patch-proposal">
+        <div class="patch-title">📋 Proposed Changes — uncheck any you don't want</div>
+        <div class="patch-checklist">
+          ${patch.changes.map(c=>`
+            <label class="patch-item">
+              <input type="checkbox" checked data-change-id="${c.id}" data-patch-id="${patchId}">
+              <div class="patch-item-text">${esc(c.label)}<small>${esc(c.detail||'')}</small></div>
+            </label>`).join('')}
+        </div>
+        <div class="patch-btns">
+          <button class="pbtn-primary" onclick="applySelectedChanges('${patchId}',this)">✓ Apply selected</button>
+          <button class="pbtn-secondary" onclick="refineUpgrade('${patchId}')">✎ Modify</button>
+          <button class="pbtn-ghost" onclick="this.closest('.patch-proposal').style.opacity='.4';this.closest('.patch-proposal').style.pointerEvents='none'">✕ Discard</button>
+        </div>
+        <div class="apply-progress" id="prog_${patchId}" style="display:none;flex-direction:column;gap:4px;margin-top:8px"></div>
+      </div>`;
+    }
+    addUpgradeMsg('ai', html);
+
+  } catch(e) {
+    clearInterval(thinkTimer);
+    const thinkEl=document.getElementById(thinkId);
+    if (thinkEl) thinkEl.remove();
+    const msg=e.message||'Unknown error';
+    const isRate=msg.includes('429')||msg.toLowerCase().includes('rate')||msg.toLowerCase().includes('tpm')||msg.toLowerCase().includes('rpm');
+    const isKey=msg.toLowerCase().includes('no key')||msg.toLowerCase().includes('api key');
+    let hint='';
+    if (isRate) hint='<br><small>→ Rate limit hit. Wait 60s and try again.</small>';
+    else if (isKey) hint='<br><small>→ Add your Groq key in Settings (free at console.groq.com)</small>';
+    upgradeRetryCount=(upgradeRetryCount||0)+1;
+    if (upgradeRetryCount<=2 && !isRate && !isKey) {
+      const errMsg=addUpgradeMsg('error-msg','<strong>Error:</strong> '+esc(msg)+`<br><small>Attempting self-correction… (${upgradeRetryCount}/2)</small>`);
+      upgradeConv.push({role:'user',content:'That errored: '+msg+'. Fix the approach.'});
+      setTimeout(()=>{ errMsg.remove(); sendUpgradeRetry(); }, 1500);
+    } else {
+      upgradeRetryCount=0;
+      addUpgradeMsg('error-msg','<strong>Error:</strong> '+esc(msg)+hint+'<br><small>Try rephrasing or breaking into smaller steps.</small>');
+    }
+  }
+  document.getElementById('upgradeSend').disabled=false;
+}
+
+async function sendUpgradeRetry() {
+  document.getElementById('upgradeSend').disabled=true;
+  const thinkId='retry_'+Date.now();
+  addUpgradeMsg('ai','<span class="spin"></span> Self-correcting…', thinkId);
+  try {
+    const keys=getKeys();
+    const system=`You are Spert's upgrade assistant. The previous patch had an error. Read the conversation, identify the exact problem, and output a corrected patch block. Be concise — just fix it.`;
+    const response = await callUpgradeModel(system, upgradeConv, keys);
+    upgradeConv.push({role:'assistant', content:response});
+    const thinkEl=document.getElementById(thinkId);
+    if (thinkEl) thinkEl.remove();
+    const patchMatch=response.match(/<patch>([\s\S]*?)<\/patch>/);
+    const convo=response.replace(/<patch>[\s\S]*?<\/patch>/,'').trim();
+    let patch=null;
+    if (patchMatch) {
+      try { patch=JSON.parse(patchMatch[1].trim()); }
+      catch { try { patch=JSON.parse(patchMatch[1].replace(/```json|```/g,'').trim()); } catch {} }
+    }
+    let html=`<div style="line-height:1.7">${formatMd(convo||'Here is a corrected patch:')}</div>`;
+    if (patch && patch.changes && patch.changes.length) {
+      const patchId='patch_'+Date.now(); window[patchId]=patch;
+      html+=`<div class="patch-proposal"><div class="patch-title">📋 Corrected Patch</div><div class="patch-checklist">${patch.changes.map(c=>`<label class="patch-item"><input type="checkbox" checked data-change-id="${c.id}" data-patch-id="${patchId}"><div class="patch-item-text">${esc(c.label)}<small>${esc(c.detail||'')}</small></div></label>`).join('')}</div><div class="patch-btns"><button class="pbtn-primary" onclick="applySelectedChanges('${patchId}',this)">✓ Apply selected</button><button class="pbtn-ghost" onclick="this.closest('.patch-proposal').style.opacity='.4';this.closest('.patch-proposal').style.pointerEvents='none'">✕ Discard</button></div><div class="apply-progress" id="prog_${patchId}" style="display:none;flex-direction:column;gap:4px;margin-top:8px"></div></div>`;
+    }
+    addUpgradeMsg('ai', html);
+  } catch(e) {
+    const thinkEl=document.getElementById(thinkId);
+    if (thinkEl) { thinkEl.className='umsg error-msg'; thinkEl.textContent='Could not self-correct: '+e.message; thinkEl.id=''; }
+  }
+  document.getElementById('upgradeSend').disabled=false;
+}
+
+async function callUpgradeModel(system, conv, keys) {
+  const BUDGETS = { groq:8000, gemini:8000, mistral:6000, openrouter:6000 };
+  let reasoning = '';
+  let thinkMsgEl = null;
+  let thinkBodyEl = null;
+
+  const showThinkBlock = () => {
+    const chat = document.getElementById('upgradeChat');
+    if (!chat) return;
+    thinkMsgEl = document.createElement('div');
+    thinkMsgEl.className = 'umsg ai';
+    thinkMsgEl.style.cssText = 'padding:0;background:transparent;border:none';
+    thinkMsgEl.innerHTML = `
+      <div class="think-block">
+        <div class="think-header" onclick="this.nextElementSibling.classList.toggle('open');this.querySelector('.think-toggle').textContent=this.nextElementSibling.classList.contains('open')?'▲ collapse':'▼ expand'">
+          <span class="think-icon">🧠</span>
+          <span>Reasoning through the code…</span>
+          <span class="think-toggle">▼ expand</span>
+        </div>
+        <div class="think-body" id="thinkBody_live"></div>
+      </div>`;
+    chat.appendChild(thinkMsgEl);
+    chat.scrollTop = chat.scrollHeight;
+    thinkBodyEl = thinkMsgEl.querySelector('#thinkBody_live');
+  };
+
+  const updateThinkBody = (text) => {
+    if (!thinkBodyEl) return;
+    thinkBodyEl.textContent = text;
+    const chat = document.getElementById('upgradeChat');
+    if (chat) chat.scrollTop = chat.scrollHeight;
+  };
+
+  const finalizeThinkBlock = (text, modelName) => {
+    if (!thinkMsgEl) return;
+    const header = thinkMsgEl.querySelector('.think-header');
+    if (header) {
+      header.querySelector('.think-icon').style.animation = 'none';
+      header.querySelector('span:nth-child(2)').textContent = 'Reasoned via ' + modelName + ' — click to inspect';
+    }
+    if (thinkBodyEl) thinkBodyEl.textContent = text || '(no visible reasoning)';
+  };
+
+  if (keys.groq) {
+    try {
+      showThinkBlock();
+      const oaiMsgs = conv.map(m=>({role:m.role==='assistant'?'assistant':'user', content:m.content}));
+      const reasonSystem = `You are a senior frontend developer reasoning about how to implement a code change in a single-file HTML web app.
+Think step by step: what needs to change, what could break, what's the safest approach.
+Then output a <patch> block with the implementation. Keep JS under 40 lines per change.
+Patch format: <patch>{"changes":[{"id":"c1","label":"...","detail":"...","css":"...","js":"..."}]}</patch>`;
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+keys.groq},
+        body: JSON.stringify({model:'deepseek-r1-distill-llama-70b', max_tokens:BUDGETS.groq,
+          temperature:0.6, stream:true,
+          messages:[{role:'system',content:reasonSystem},...oaiMsgs]})
+      });
+      if (!res.ok) throw new Error((await res.json()).error?.message||res.status);
+
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let buf=''; let full=''; let inThink=false; let thinkText='';
+
+      while (true) {
+        const {done, value} = await reader.read(); if (done) break;
+        buf += dec.decode(value, {stream:true});
+        const lines2 = buf.split('\n'); buf = lines2.pop()||'';
+        for (const line of lines2) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6).trim(); if (data==='[DONE]') continue;
+          try {
+            const j = JSON.parse(data);
+            const delta = j.choices?.[0]?.delta?.content||'';
+            if (!delta) continue;
+            full += delta;
+            if (full.includes('<think>') && !full.includes('</think>')) {
+              inThink = true;
+              thinkText = full.replace(/^[\s\S]*?<think>/,'');
+              updateThinkBody(thinkText + '\u258a');
+            } else if (inThink && full.includes('</think>')) {
+              inThink = false;
+              thinkText = full.replace(/^[\s\S]*?<think>/,'').replace(/<\/think>[\s\S]*/,'');
+              updateThinkBody(thinkText);
+            }
+          } catch {}
+        }
+      }
+
+      const thinkMatch = full.match(/<think>([\s\S]*?)<\/think>/);
+      reasoning = thinkMatch?.[1]?.trim() || '';
+      const answer = full.replace(/<think>[\s\S]*?<\/think>/,'').trim();
+      finalizeThinkBlock(reasoning, 'DeepSeek R1');
+      if (answer.includes('<patch>') && answer.includes('</patch>')) return answer;
+      reasoning = reasoning || answer.slice(0, 2000);
+
+    } catch(e) {
+      console.warn('R1 reasoning failed:', e.message);
+      if (thinkMsgEl) { thinkMsgEl.remove(); thinkMsgEl=null; thinkBodyEl=null; }
+      reasoning = '';
+    }
+  }
+
+  if (!reasoning && keys.gemini) {
+    try {
+      showThinkBlock();
+      const gemMsgs = conv.map(m=>({role:m.role==='assistant'?'model':'user', parts:[{text:m.content}]}));
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(keys.gemini)}`;
+      const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({system_instruction:{parts:[{text:system}]}, contents:gemMsgs,
+          generationConfig:{maxOutputTokens:BUDGETS.gemini, temperature:1},
+          thinkingConfig:{thinkingBudget:8000}})});
+      const d = await res.json();
+      if (d.error) throw new Error('Gemini: '+d.error.message);
+      const parts = d.candidates?.[0]?.content?.parts||[];
+      const thoughtPart = parts.find(p=>p.thought);
+      const textPart = parts.find(p=>!p.thought);
+      reasoning = thoughtPart?.text || '';
+      const answer = textPart?.text || parts.map(p=>p.text||'').join('');
+      finalizeThinkBlock(reasoning, 'Gemini 2.5 Flash');
+      if (answer.includes('<patch>') && answer.includes('</patch>')) return answer;
+    } catch(e) {
+      console.warn('Gemini thinking failed:', e.message);
+      if (thinkMsgEl) { thinkMsgEl.remove(); thinkMsgEl=null; }
+      reasoning = '';
+    }
+  }
+
+  const codeSystem = reasoning
+    ? system + '\n\n=== ANALYSIS REASONING ===\n' + reasoning + '\n=== END REASONING ===\n\nNow produce the patch. Output ONLY the answer with the <patch> block.'
+    : system;
+  const oaiMsgs2 = conv.map(m=>({role:m.role==='assistant'?'assistant':'user', content:m.content}));
+
+  if (keys.groq) {
+    try {
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+keys.groq},
+        body: JSON.stringify({model:'llama-3.3-70b-versatile', max_tokens:BUDGETS.groq, temperature:0.3,
+          messages:[{role:'system',content:codeSystem},...oaiMsgs2]})});
+      const d = await res.json(); if(d.error) throw new Error(d.error.message);
+      const text = d.choices?.[0]?.message?.content||'';
+      if (d.choices?.[0]?.finish_reason==='length' && text.includes('<patch>') && !text.includes('</patch>'))
+        throw new Error('Token limit hit mid-patch — ask for fewer changes at once');
+      return text;
+    } catch(e) { console.warn('Groq p2:', e.message); }
+  }
+  if (keys.gemini) {
+    try {
+      const gemMsgs2 = conv.map(m=>({role:m.role==='assistant'?'model':'user', parts:[{text:m.content}]}));
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(keys.gemini)}`;
+      const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({system_instruction:{parts:[{text:codeSystem}]}, contents:gemMsgs2,
+          generationConfig:{maxOutputTokens:BUDGETS.gemini, temperature:0.3}})});
+      const d = await res.json(); if(d.error) throw new Error(d.error.message);
+      return d.candidates?.[0]?.content?.parts?.map(p=>p.text||'').join('')||'';
+    } catch(e) { console.warn('Gemini p2:', e.message); }
+  }
+  if (keys.mistral) {
+    try {
+      const res = await fetch('https://api.mistral.ai/v1/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+keys.mistral},
+        body: JSON.stringify({model:'mistral-small-latest', max_tokens:BUDGETS.mistral, temperature:0.3,
+          messages:[{role:'system',content:codeSystem},...oaiMsgs2]})});
+      const d = await res.json(); if(d.error) throw new Error(d.error.message);
+      return d.choices?.[0]?.message?.content||'';
+    } catch(e) { console.warn('Mistral p2:', e.message); }
+  }
+  if (keys.openrouter) {
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+keys.openrouter,'HTTP-Referer':'https://spert.app','X-Title':'Spert'},
+        body: JSON.stringify({model:'meta-llama/llama-3.3-70b-instruct:free', max_tokens:BUDGETS.openrouter, temperature:0.3,
+          messages:[{role:'system',content:codeSystem},...oaiMsgs2]})});
+      const d = await res.json(); if(d.error) throw new Error(d.error.message);
+      return d.choices?.[0]?.message?.content||'';
+    } catch(e) { console.warn('OR p2:', e.message); }
+  }
+
+  throw new Error('All providers failed. Check your API keys in Settings.');
+}
+
+async function applySelectedChanges(patchId, btn) {
+  const patch=window[patchId];
+  if (!patch) { console.warn('No patch found for id:', patchId); return; }
+  const proposal=btn.closest('.patch-proposal');
+  const checked=Array.from(proposal.querySelectorAll('input[type=checkbox]:checked')).map(cb=>cb.dataset.changeId);
+  const toApply=patch.changes.filter(c=>checked.includes(c.id));
+  if (!toApply.length) { addUpgradeMsg('ai','No changes selected — check at least one box first.'); return; }
+
+  const prog=document.getElementById('prog_'+patchId);
+  prog.style.display='flex';
+  btn.disabled=true;
+
+  const savedPatches=[];
+  const failedDetails=[];
+
+  for (const change of toApply) {
+    const stepEl=document.createElement('div');
+    stepEl.className='apply-step';
+    stepEl.innerHTML=`<span class="si"><span class="spin"></span></span> ${esc(change.label)}`;
+    prog.appendChild(stepEl);
+    try {
+      if (change.css) { const s=document.createElement('style'); s.textContent=change.css; s.setAttribute('data-patch',change.id); document.head.appendChild(s); }
+      if (change.js) { const fn=new Function(change.js); fn(); }
+      stepEl.className='apply-step done';
+      stepEl.innerHTML=`<span class="si">✓</span> ${esc(change.label)}`;
+      savedPatches.push({id:Date.now()+'_'+change.id, description:change.label, css:change.css||'', js:change.js||'', ts:new Date().toISOString()});
+      logChangeToChangelog({label:change.label, detail:change.detail||'', ts:new Date().toISOString()});
+    } catch(e) {
+      stepEl.className='apply-step fail';
+      stepEl.innerHTML=`<span class="si">✗</span> ${esc(change.label)}: ${esc(e.message)}`;
+      failedDetails.push(`"${change.label}" failed: ${e.message}`);
+    }
+  }
+
+  if (sbUrl&&sbKey&&savedPatches.length) {
+    try {
+      const existing=await sbGet('patches')||[];
+      const all=Array.isArray(existing)?[...existing,...savedPatches]:savedPatches;
+      const capped=all.length>50?all.slice(all.length-50):all;
+      await sbSet('patches',capped);
+    } catch {}
+  }
+
+  const ghConnected=!!(localStorage.getItem('spert_ghToken')&&localStorage.getItem('spert_ghRepo'));
+  if (ghConnected&&savedPatches.length) {
+    const pushStep=document.createElement('div');
+    pushStep.className='apply-step';
+    pushStep.innerHTML=`<span class="si"><span class="spin"></span></span> Pushing to GitHub…`;
+    prog.appendChild(pushStep);
+    try {
+      await pushToGitHub(document.documentElement.outerHTML);
+      pushStep.className='apply-step done';
+      pushStep.innerHTML=`<span class="si">✓</span> Pushed — Cloudflare Pages deploying (~60 sec)`;
+    } catch(e) {
+      pushStep.className='apply-step fail';
+      pushStep.innerHTML=`<span class="si">✗</span> GitHub push failed: ${esc(e.message)}`;
+    }
+  }
+
+  proposal.style.opacity='.5';
+  proposal.style.pointerEvents='none';
+
+  if (failedDetails.length) {
+    upgradeConv.push({role:'user', content:`These patch changes failed:\n${failedDetails.join('\n')}\nPlease diagnose and output a corrected patch.`});
+    setTimeout(()=>sendUpgradeRetry(), 800);
+  }
+}
+
+function refineUpgrade(patchId) {
+  const patch = window[patchId];
+  const desc = patch ? patch.changes.map(c=>c.label).join(', ') : String(patchId);
+  const input=document.getElementById('upgradeInput');
+  input.value='Modify the proposed changes: '+desc+' — ';
+  input.focus(); autoResize(input);
+  const l=input.value.length; input.setSelectionRange(l,l);
+}
+
+/* ═══════════════════════════════════
+   PATCHES RELOAD
+═══════════════════════════════════ */
+async function loadPatches() {
+  if (!sbUrl||!sbKey) return;
+  try {
+    const patches=await sbGet('patches');
+    if (!Array.isArray(patches)) return;
+    patches.forEach(p=>{
+      if (p.css){const s=document.createElement('style');s.textContent=p.css;document.head.appendChild(s);}
+      if (p.js){try{const fn=new Function(p.js);fn();}catch(e){console.warn('Patch re-apply failed:',p.description,e);}}
+    });
+    if (patches.length) console.log(`Spert: ${patches.length} patch(es) reloaded`);
+  } catch {}
+}
+
+function switchUpgradeTab(tab) {
+  const chat = document.getElementById('upgradeChat');
+  const log = document.getElementById('upgradeChangelog');
+  const dock = document.getElementById('upgradeInput')?.closest('.upgrade-input-dock');
+  if(chat) chat.style.display = tab==='chat'?'flex':'none';
+  if(log) log.style.display = tab==='log'?'block':'none';
+  if(dock) dock.style.display = tab==='chat'?'flex':'none';
+  document.getElementById('utab-chat')?.classList.toggle('active', tab==='chat');
+  document.getElementById('utab-log')?.classList.toggle('active', tab==='log');
+  if (tab==='log') renderChangelog();
+}
+
+function renderChangelog() {
+  const el = document.getElementById('upgradeChangelog');
+  if (!el) return;
+  const raw = JSON.parse(localStorage.getItem('spert_changelog')||'[]');
+  const entries = [...raw].reverse();
+  if (!entries.length) {
+    el.innerHTML='<div style="color:var(--fg3);text-align:center;padding:40px 0;font-size:14px">No changes applied yet.</div>';
+    return;
+  }
+  el.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <span style="font-size:12px;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.05em">${entries.length} change${entries.length===1?'':'s'} applied</span>
+    <button onclick="if(confirm('Clear changelog?')){localStorage.removeItem('spert_changelog');renderChangelog();}" style="font-size:11px;border:var(--bord);border-radius:6px;background:transparent;color:var(--fg3);cursor:pointer;padding:3px 8px">Clear</button>
+  </div>`
+  + entries.map(e=>`<div class="changelog-entry">
+    <div class="changelog-ts">${new Date(e.ts).toLocaleString()}</div>
+    <div class="changelog-label">${esc(e.label)}</div>
+    ${e.detail?`<div class="changelog-detail">${esc(e.detail)}</div>`:''}
+  </div>`).join('');
+}
+
+function logChangeToChangelog(entry) {
+  const log = JSON.parse(localStorage.getItem('spert_changelog')||'[]');
+  log.push({label: entry.label||'Change', detail: entry.description||entry.detail||'', ts: entry.ts||new Date().toISOString()});
+  if (log.length > 500) log.splice(0, log.length-500);
+  localStorage.setItem('spert_changelog', JSON.stringify(log));
+}
+
+function saveDraft(el, key) { localStorage.setItem('spert_draft_'+key, el.value); }
+
+function loadDrafts() {
+  const mainEl = document.getElementById('mainInput');
+  const mainDraft = localStorage.getItem('spert_draft_mainDraft');
+  if (mainEl && mainDraft && !mainEl.value) { mainEl.value=mainDraft; autoResize(mainEl); }
+  const upEl = document.getElementById('upgradeInput');
+  const upDraft = localStorage.getItem('spert_draft_upgradeDraft');
+  if (upEl && upDraft && !upEl.value) { upEl.value=upDraft; autoResize(upEl); }
+}
+
+async function clearPatches() {
+  if (!sbUrl||!sbKey) { alert('Supabase not connected'); return; }
+  if (!confirm('Clear all saved Upgrade Studio patches from cloud?')) return;
+  try {
+    await sbSet('patches', []);
+    const statusEl=document.getElementById('sbStatus');
+    if(statusEl){statusEl.style.display='inline';statusEl.style.color='var(--green)';statusEl.textContent='✓ Patches cleared';setTimeout(()=>statusEl.style.display='none',3000);}
+  } catch(e) { alert('Error: '+e.message); }
+}
+
+/* ═══════════════════════════════════
+   PROJECTS
+═══════════════════════════════════ */
+function newProject() {
+  const name=prompt('Project name:'); if (!name) return;
+  const desc=prompt('Short description (optional):')||'';
+  projects.push({id:Date.now(),name,desc,files:[],notes:'',created:new Date().toISOString()});
+  renderProjects(); syncToCloud();
+}
+
+function renderProjects() {
+  const grid=document.getElementById('projGrid');
+  grid.innerHTML='';
+  if (!projects.length) {
+    grid.innerHTML='<div class="empty-state"><div class="empty-icon">📁</div><div class="empty-text">No projects yet</div><div class="empty-sub">Click + New Project to create one</div></div>';
+    return;
+  }
+  projects.forEach(p=>{
+    const c=document.createElement('div'); c.className='proj-card';
+    c.innerHTML=`<div class="proj-name">${esc(p.name)}</div><div class="proj-desc">${esc(p.desc||'No description')}</div><div class="proj-meta">${new Date(p.created).toLocaleDateString()}</div>`;
+    c.onclick=()=>openProject(p.id);
+    grid.appendChild(c);
+  });
+}
+
+function openProject(id) {
+  const p=projects.find(x=>x.id===id); if (!p) return;
+  const detail=document.getElementById('projDetail');
+  detail.classList.add('open');
+  detail.innerHTML=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+    <div style="font-size:16px;font-weight:600;flex:1">${esc(p.name)}</div>
+    <button onclick="document.getElementById('projDetail').classList.remove('open')" style="padding:5px 10px;font-size:12px;border:var(--bord);border-radius:var(--r);background:transparent;color:var(--fg3);cursor:pointer">Close</button>
+    <button onclick="deleteProject(${id})" style="padding:5px 10px;font-size:12px;border:1px solid var(--redbord);border-radius:var(--r);background:transparent;color:var(--red);cursor:pointer">Delete</button>
+  </div>
+  <textarea placeholder="Project notes…" style="width:100%;min-height:80px;padding:10px;font-size:13px;border:var(--bord);border-radius:var(--r);background:var(--bg2);color:var(--fg);outline:none;resize:vertical;font-family:var(--ff)" oninput="updateProjectNotes(${id},this.value)">${esc(p.notes||'')}</textarea>
+  <div style="font-size:12px;font-weight:600;color:var(--fg3)">Quick AI prompt for this project:</div>
+  <div style="display:flex;gap:6px">
+    <input id="projAiInput" placeholder="Ask about or build something for ${esc(p.name)}…" style="flex:1;padding:8px 11px;font-size:13px;border:var(--bord);border-radius:var(--r);background:var(--bg2);color:var(--fg);outline:none" onkeydown="if(event.key==='Enter'){sendProjectPrompt(${id})}">
+    <button onclick="sendProjectPrompt(${id})" style="padding:8px 14px;font-size:13px;font-weight:600;border:none;border-radius:var(--r);background:var(--accent);color:#fff;cursor:pointer">Ask</button>
+  </div>`;
+  detail.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function updateProjectNotes(id, val) { const p=projects.find(x=>x.id===id); if (p) { p.notes=val; syncToCloud(); } }
+function deleteProject(id) {
+  if (!confirm('Delete this project?')) return;
+  projects=projects.filter(p=>p.id!==id); renderProjects(); syncToCloud();
+  document.getElementById('projDetail').classList.remove('open');
+}
+
+function sendProjectPrompt(id) {
+  const p=projects.find(x=>x.id===id); if (!p) return;
+  const val=document.getElementById('projAiInput').value.trim(); if (!val) return;
+  showTab('ai', document.querySelector('.nav-tab'));
+  document.getElementById('mainInput').value=`[Project: ${p.name}] ${val}`;
+  sendMessage();
+}
+
+/* ═══════════════════════════════════
+   APPS
+═══════════════════════════════════ */
+const BUILTIN_APPS=[
+  {id:'3d-viewer', name:'3D Model Viewer', icon:'🎲', desc:'Create and view 3D shapes, models, and scenes', code:'builtin', builtin:true},
+  {id:'data-viz',  name:'Data Visualizer', icon:'📊', desc:'Paste data and generate charts automatically',  code:'builtin', builtin:true},
+  {id:'code-run',  name:'Code Runner',     icon:'⚡', desc:'Write and run HTML/JS/CSS code live',           code:'builtin', builtin:true},
+  {id:'notes',     name:'Quick Notes',     icon:'📝', desc:'Persistent notes with AI assistance',           code:'builtin', builtin:true},
+];
+
+function saveApp(app) {
+  if (!apps.find(a=>a.name===app.name)) { apps.push(app); renderApps(); syncToCloud(); }
+}
+
+function renderApps() {
+  const grid=document.getElementById('appGrid');
+  grid.innerHTML='';
+  const all=[...BUILTIN_APPS,...apps];
+  all.forEach(app=>{
+    const c=document.createElement('div'); c.className='app-card';
+    c.innerHTML=`<div class="app-icon">${app.icon||'🛠'}</div>
+      <div class="app-name">${esc(app.name)}</div>
+      <div class="app-desc">${esc(app.desc||'')}</div>
+      <div class="app-actions">
+        <div class="app-btn primary" onclick="openApp('${esc(app.id||app.name)}')">Open</div>
+        ${!app.builtin?`<div class="app-btn" onclick="deleteApp('${esc(app.id||app.name)}')">Delete</div>`:''}
+      </div>`;
+    grid.appendChild(c);
+  });
+  if (!all.length) grid.innerHTML='<div class="empty-state"><div class="empty-icon">🛠</div><div class="empty-text">No apps yet</div><div class="empty-sub">Ask the AI to build you an app</div></div>';
+}
+
+async function openApp(id) {
+  const all=[...BUILTIN_APPS,...apps];
+  const app=all.find(a=>(a.id||a.name)===id);
+  if (!app) return;
+  document.getElementById('appWinTitle').textContent=app.name;
+  currentOpenApp=app;
+  const win=document.getElementById('appWindow'); win.classList.add('open');
+  const frame=document.getElementById('appFrame');
+  if (app.builtin) {
+    frame.srcdoc=`<html><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#888">Generating ${app.name}…</body></html>`;
+    try {
+      const code=await callBestModel(
+        'You are an expert app developer. Build a complete, self-contained, beautiful HTML+JS+CSS app with no external dependencies.',
+        `Build: ${app.name}\nDescription: ${app.desc}`, false, 5000
+      );
+      const htmlMatch=code.match(/<!DOCTYPE html>[\s\S]*?<\/html>/i)?.[0]||code;
+      frame.srcdoc=htmlMatch;
+      const appIdx=apps.findIndex(a=>(a.id||a.name)===id);
+      if (appIdx>=0) apps[appIdx].code=htmlMatch;
+      else apps.push({...app, code:htmlMatch, builtin:false});
+      syncToCloud();
+    } catch(e) { frame.srcdoc=`<html><body style="padding:20px;font-family:sans-serif;color:red">Error: ${e.message}</body></html>`; }
+  } else {
+    frame.srcdoc=app.code||'<html><body style="padding:20px">No code found</body></html>';
+  }
+}
+
+function closeAppWindow() { document.getElementById('appWindow').classList.remove('open'); }
+
+async function upgradeApp() {
+  if (!currentOpenApp) return;
+  const prompt=document.getElementById('appWinPrompt').value.trim(); if (!prompt) return;
+  document.getElementById('appWinPrompt').value='';
+  const frame=document.getElementById('appFrame');
+  const currentCode=frame.srcdoc||'';
+  try {
+    const upgraded=await callBestModel(
+      'You are modifying an existing HTML app. Output ONLY the complete updated HTML file. Apply the requested changes minimally and cleanly.',
+      `CURRENT APP CODE:\n${currentCode.substring(0,6000)}\n\nREQUESTED CHANGE: ${prompt}`, false, 5000
+    );
+    const htmlMatch=upgraded.match(/<!DOCTYPE html>[\s\S]*?<\/html>/i)?.[0]||upgraded;
+    frame.srcdoc=htmlMatch;
+    const appIdx=apps.findIndex(a=>(a.id||a.name)===(currentOpenApp.id||currentOpenApp.name));
+    if (appIdx>=0) { apps[appIdx].code=htmlMatch; syncToCloud(); }
+  } catch(e) { alert('Upgrade failed: '+e.message); }
+}
+
+function deleteApp(id) {
+  if (!confirm('Delete this app?')) return;
+  apps=apps.filter(a=>(a.id||a.name)!==id); renderApps(); syncToCloud();
+}
+
+function requestNewApp() {
+  showTab('ai', document.querySelector('.nav-tab'));
+  document.getElementById('mainInput').value='Build me a web app that ';
+  document.getElementById('mainInput').focus();
+}
+
+/* ═══════════════════════════════════
+   MODE SETTINGS
+═══════════════════════════════════ */
+function setVoice(el) { document.querySelectorAll('.mchip').forEach(c=>c.classList.remove('sel')); el.classList.add('sel'); selectedVoice=el.dataset.v; }
+function adjPasses(d) { passes=Math.max(1,Math.min(5,(parseInt(document.getElementById('passesNum').value)||1)+d)); document.getElementById('passesNum').value=passes; updatePassDesc(); }
+function updatePassDesc() {
+  passes=parseInt(document.getElementById('passesNum').value)||1;
+  document.getElementById('passDesc').textContent=passes===1?'1 pass — fastest':passes===2?'2 passes — refined':passes===3?'3 passes — high quality':`${passes} passes — max quality`;
+}
+
+/* ═══════════════════════════════════
+   USAGE TRACKING & DASHBOARD
+═══════════════════════════════════ */
+function logUsage(entry) {
+  entry.ts = entry.ts || Date.now();
+  usageLog.push(entry);
+  if (usageLog.length > 2000) usageLog = usageLog.slice(-2000);
+  localStorage.setItem('spert_usageLog', JSON.stringify(usageLog));
+  if (document.getElementById('usageDashboard')?.style.display !== 'none') renderUsageDashboard();
+  updateUsageBadge();
+}
+
+function updateUsageBadge() {
+  const badge = document.getElementById('usageBadge');
+  if (!badge) return;
+  const now = Date.now();
+  const last1h = usageLog.filter(e => now - e.ts < 3600000);
+  const keys = getKeys();
+  let worstPct = 0;
+  for (const prov of ['groq','gemini','mistral','openrouter']) {
+    if (!keys[prov]) continue;
+    const lim = PROVIDER_LIMITS[prov];
+    const calls1h = last1h.filter(e=>e.provider===prov).length;
+    const pct = lim.rpd ? (calls1h / (lim.rpd/24)) : (calls1h / (lim.rpm * 60));
+    if (pct > worstPct) worstPct = pct;
+  }
+  badge.style.background = worstPct > 0.8 ? 'var(--red)' : worstPct > 0.5 ? '#f97316' : 'var(--green)';
+  badge.style.display = 'flex';
+}
+
+function openUsageDashboard() {
+  const el = document.getElementById('usageDashboard');
+  if (!el) return;
+  el.style.display = 'flex';
+  renderUsageDashboard();
+}
+
+function closeUsageDashboard() {
+  const el = document.getElementById('usageDashboard');
+  if (el) el.style.display = 'none';
+}
+
+function renderUsageDashboard() {
+  const container = document.getElementById('usageDashboardInner');
+  if (!container) return;
+  const keys = getKeys();
+  const now = Date.now();
+  const last1m  = usageLog.filter(e => now - e.ts < 60000);
+  const last1h  = usageLog.filter(e => now - e.ts < 3600000);
+  const last24h = usageLog.filter(e => now - e.ts < 86400000);
+  const last7d  = usageLog.filter(e => now - e.ts < 604800000);
+  const providers = ['groq','gemini','mistral','openrouter'];
+  const providerNames = {groq:'Groq',gemini:'Gemini',mistral:'Mistral',openrouter:'OpenRouter'};
+  let cardsHtml = '';
+  for (const prov of providers) {
+    if (!keys[prov]) continue;
+    const lim = PROVIDER_LIMITS[prov];
+    const calls1h  = last1h.filter(e=>e.provider===prov).length;
+    const calls24h = last24h.filter(e=>e.provider===prov).length;
+    const toks1h   = last1h.filter(e=>e.provider===prov).reduce((a,e)=>(a+(e.tokensIn||0)+(e.tokensOut||0)),0);
+    let rlHtml = '';
+    if (prov === 'groq') {
+      const lastEntry = [...usageLog].reverse().find(e=>e.provider==='groq'&&e.rateLimitRemaining!=null&&e.rateLimitRemaining>=0);
+      if (lastEntry) {
+        const remReq = lastEntry.rateLimitRemaining;
+        const remTok = lastEntry.rateLimitRemainingTokens;
+        const resetR = lastEntry.rateLimitReset;
+        const resetT = lastEntry.rateLimitResetTokens;
+        const totalReq = lastEntry.rateLimitRPM || lim.rpm;
+        const totalTok = lastEntry.rateLimitTPM || lim.tpm;
+        const reqPct = totalReq > 0 ? Math.round((1-(remReq/totalReq))*100) : 0;
+        const tokPct = totalTok > 0 ? Math.round((1-(remTok/totalTok))*100) : 0;
+        rlHtml = `
+          <div class="ud-rl-row"><span>Requests/min</span><div class="ud-bar-wrap"><div class="ud-bar" style="width:${reqPct}%;background:${reqPct>80?'var(--red)':reqPct>50?'#f97316':'var(--green)'}"></div></div><span>${remReq>=0?remReq+' remaining':'—'} · resets ${resetR||'soon'}</span></div>
+          <div class="ud-rl-row"><span>Tokens/min</span><div class="ud-bar-wrap"><div class="ud-bar" style="width:${tokPct}%;background:${tokPct>80?'var(--red)':tokPct>50?'#f97316':'var(--green)'}"></div></div><span>${remTok>=0?remTok.toLocaleString()+' remaining':'—'} · resets ${resetT||'soon'}</span></div>
+          <div class="ud-live-tag">⚡ Live from API headers</div>`;
+      } else {
+        rlHtml = `<div class="ud-rl-row"><span style="color:var(--fg3);font-size:12px">Make a call first to see live rate limit data</span></div>`;
+      }
+    } else {
+      const rpmUsed = last1m.filter(e=>e.provider===prov).length;
+      const rpmPct = Math.min(100, Math.round((rpmUsed/lim.rpm)*100));
+      const rpdPct = lim.rpd ? Math.min(100, Math.round((calls24h/lim.rpd)*100)) : null;
+      rlHtml = `
+        <div class="ud-rl-row"><span>Req/min (est.)</span><div class="ud-bar-wrap"><div class="ud-bar" style="width:${rpmPct}%;background:${rpmPct>80?'var(--red)':rpmPct>50?'#f97316':'var(--green)'}"></div></div><span>${rpmUsed}/${lim.rpm}</span></div>
+        ${rpdPct!=null?`<div class="ud-rl-row"><span>Req/day (est.)</span><div class="ud-bar-wrap"><div class="ud-bar" style="width:${rpdPct}%;background:${rpdPct>80?'var(--red)':rpdPct>50?'#f97316':'var(--green)'}"></div></div><span>${calls24h}/${lim.rpd}</span></div>`:''}
+        <div class="ud-live-tag" style="color:var(--fg3)">📊 Estimated from local log</div>`;
+    }
+    cardsHtml += `<div class="ud-card">
+      <div class="ud-card-header">
+        <span class="ud-prov-name">${providerNames[prov]}</span>
+        <span class="ud-stat-chips">
+          <span class="ud-chip">${calls1h} calls/hr</span>
+          <span class="ud-chip">${toks1h.toLocaleString()} tokens/hr</span>
+          <span class="ud-chip">${calls24h} calls today</span>
+        </span>
+      </div>
+      <div class="ud-rl-section">${rlHtml}</div>
+    </div>`;
+  }
+  if (!cardsHtml) cardsHtml = `<div style="color:var(--fg3);padding:20px;text-align:center">Add API keys in Settings to see usage data</div>`;
+
+  const buckets = Array(24).fill(0);
+  const tokenBuckets = Array(24).fill(0);
+  last24h.forEach(e => {
+    const hoursAgo = Math.floor((now - e.ts) / 3600000);
+    const bucket = 23 - Math.min(23, hoursAgo);
+    buckets[bucket]++;
+    tokenBuckets[bucket] += (e.tokensIn||0) + (e.tokensOut||0);
+  });
+  const maxCalls = Math.max(1, ...buckets);
+  const maxToks = Math.max(1, ...tokenBuckets);
+  const hours = Array(24).fill(0).map((_,i)=>{ const h = new Date(now - (23-i)*3600000).getHours(); return h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p'; });
+  const sparkCalls = buckets.map((v,i)=>`<div class="ud-spark-bar" style="height:${Math.max(2,Math.round((v/maxCalls)*60))}px" title="${hours[i]}: ${v} calls"></div>`).join('');
+  const sparkToks  = tokenBuckets.map((v,i)=>`<div class="ud-spark-bar" style="height:${Math.max(2,Math.round((v/maxToks)*60))}px;background:var(--accent2)" title="${hours[i]}: ${v.toLocaleString()} tokens"></div>`).join('');
+  const dayBuckets = Array(7).fill(0).map((_,i)=>({calls:0,toks:0,label:new Date(now-(6-i)*86400000).toLocaleDateString('en',{weekday:'short'})}));
+  last7d.forEach(e=>{ const dAgo = Math.min(6, Math.floor((now-e.ts)/86400000)); const b = dayBuckets[6-dAgo]; b.calls++; b.toks+=(e.tokensIn||0)+(e.tokensOut||0); });
+  const maxDayCalls = Math.max(1,...dayBuckets.map(b=>b.calls));
+  const dayBars = dayBuckets.map(b=>`<div class="ud-day-col"><div class="ud-day-bar" style="height:${Math.max(2,Math.round((b.calls/maxDayCalls)*80))}px" title="${b.calls} calls"></div><div class="ud-day-label">${b.label}</div></div>`).join('');
+  const recoProv = providers.filter(p=>keys[p]).map(p=>{ const lim=PROVIDER_LIMITS[p]; const used1h=last1h.filter(e=>e.provider===p).length; const headroom=lim.rpd?1-(used1h/(lim.rpd/24)):1-(used1h/(lim.rpm*60)); return {p,headroom}; }).sort((a,b)=>b.headroom-a.headroom)[0];
+  const recoHtml = recoProv ? `<div class="ud-reco">💡 Most headroom right now: <strong>${providerNames[recoProv.p]}</strong></div>` : '';
+
+  container.innerHTML = `
+    ${recoHtml}
+    <div class="ud-section-title">Live Rate Limits</div>
+    <div class="ud-cards">${cardsHtml}</div>
+    <div class="ud-section-title">Calls per hour — last 24h</div>
+    <div class="ud-spark-wrap">${sparkCalls}</div>
+    <div class="ud-spark-hours">${hours.filter((_,i)=>i%4===0).map(h=>`<span>${h}</span>`).join('')}</div>
+    <div class="ud-section-title" style="margin-top:16px">Tokens per hour — last 24h</div>
+    <div class="ud-spark-wrap">${sparkToks}</div>
+    <div class="ud-section-title" style="margin-top:16px">Daily calls — last 7 days</div>
+    <div class="ud-day-chart">${dayBars}</div>
+    <div style="text-align:center;margin-top:20px">
+      <button onclick="if(confirm('Clear all usage history?')){usageLog=[];localStorage.removeItem('spert_usageLog');renderUsageDashboard();}" style="padding:6px 14px;font-size:12px;border:var(--bord);border-radius:6px;background:var(--bg2);color:var(--fg3);cursor:pointer">🗑 Clear history</button>
+    </div>`;
+}
+
+/* ═══ TOAST ═══ */
+function showToast(msg, dur=2500) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), dur);
+}
+
+/* ═══ HISTORY SIDEBAR ═══ */
+function toggleHistory() {
+  const s=document.getElementById('historySidebar');
+  const o=document.getElementById('sidebarOverlay');
+  const open=s.classList.contains('open');
+  s.classList.toggle('open',!open); o.classList.toggle('open',!open);
+  if (!open) renderHistoryList();
+}
+
+function renderHistoryList() {
+  const list=document.getElementById('historyList');
+  list.innerHTML='';
+  if (!chatHistory.length) {
+    list.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--fg4)">No past chats yet.</div>';
+    return;
+  }
+  [...chatHistory].reverse().forEach(session=>{
+    const d=document.createElement('div'); d.className='history-item';
+    d.innerHTML=`<div class="history-item-preview">${esc(session.preview||'Chat')}</div><div class="history-item-date">${new Date(session.date||session.id).toLocaleDateString()}</div>`;
+    d.onclick=()=>loadHistorySession(session);
+    list.appendChild(d);
+  });
+}
+
+function loadHistorySession(session) {
+  if (currentSessionMsgs.length) {
+    chatHistory.push({id:Date.now(),msgs:currentSessionMsgs,preview:currentSessionMsgs[0]?.text?.substring(0,60)||'Chat',date:new Date().toISOString()});
+  }
+  currentSessionMsgs=[...session.msgs];
+  const hist=document.getElementById('chatHistory');
+  hist.innerHTML='';
+  session.msgs.forEach(m=>{
+    const div=document.createElement('div'); div.className='msg '+m.role;
+    div.innerHTML=`<div class="msg-bubble"><p>${formatMd(m.text||'')}</p>${m.badge&&m.badge!=='off'?`<span class="fc-badge ${m.badge}">${m.badge==='pass'?'✓ Fact-checked':'⚠ Reviewed'}</span>`:''}</div>`;
+    hist.appendChild(div);
+  });
+  hist.scrollTop=hist.scrollHeight;
+  toggleHistory();
+  showTab('ai', document.querySelector('.nav-tab'));
+}
+
+/* ═══ IMPORT CHAT ═══ */
+function openImportModal() { document.getElementById('importModal').classList.add('open'); }
+
+function importChat() {
+  const text=document.getElementById('importText').value.trim();
+  if (!text) return;
+  const lines=text.split(/\n/);
+  const msgs=[];
+  let currentRole=null; let currentText='';
+  const userPrefixes=['You:','Human:','User:','Me:'];
+  const aiPrefixes=['ChatGPT:','Assistant:','Gemini:','Claude:','AI:','Spert:'];
+  lines.forEach(line=>{
+    const uMatch=userPrefixes.find(p=>line.startsWith(p));
+    const aMatch=aiPrefixes.find(p=>line.startsWith(p));
+    if (uMatch) { if(currentRole)msgs.push({role:currentRole,text:currentText.trim()}); currentRole='user'; currentText=line.slice(uMatch.length).trim(); }
+    else if (aMatch) { if(currentRole)msgs.push({role:currentRole,text:currentText.trim()}); currentRole='ai'; currentText=line.slice(aMatch.length).trim(); }
+    else { currentText+='\n'+line; }
+  });
+  if (currentRole) msgs.push({role:currentRole,text:currentText.trim()});
+  if (!msgs.length) { showToast('Could not parse chat format'); return; }
+  newChat();
+  currentSessionMsgs=msgs;
+  const hist=document.getElementById('chatHistory');
+  msgs.forEach(m=>{
+    const div=document.createElement('div'); div.className='msg '+m.role;
+    div.innerHTML=`<div class="msg-bubble"><p>${formatMd(m.text)}</p></div>`;
+    hist.appendChild(div);
+  });
+  hist.scrollTop=hist.scrollHeight;
+  document.getElementById('importModal').classList.remove('open');
+  document.getElementById('importText').value='';
+  showToast(`✓ Imported ${msgs.length} messages`);
+}
+
+/* ═══ PDF EXPORT ═══ */
+function exportLastResponsePDF() {
+  const aiMsgs=document.querySelectorAll('.msg.ai .msg-bubble');
+  if (!aiMsgs.length) { showToast('No AI response to export yet'); return; }
+  const choice=currentSessionMsgs.length>2
+    ? confirm('Export full conversation?\n\nOK = Full conversation\nCancel = Last response only')
+    : false;
+  try {
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'pt',format:'a4'});
+    doc.setFont('helvetica','bold'); doc.setFontSize(14);
+    doc.text('Spert Export',50,50);
+    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(120);
+    doc.text(new Date().toLocaleString(),50,68);
+    doc.setDrawColor(200); doc.line(50,76,545,76);
+    doc.setFontSize(11); doc.setTextColor(30);
+    let y=92;
+    const addText=(text,bold=false)=>{
+      doc.setFont('helvetica',bold?'bold':'normal');
+      const lines=doc.splitTextToSize(text,495);
+      lines.forEach(l=>{ if(y>800){doc.addPage();y=50;} doc.text(l,50,y); y+=15; });
+      y+=4;
+    };
+    if (choice && currentSessionMsgs.length) {
+      currentSessionMsgs.forEach(m=>{ addText(m.role==='user'?'You:':'Spert:', true); addText(m.text||''); y+=6; });
+    } else {
+      const lastBubble=aiMsgs[aiMsgs.length-1];
+      addText(lastBubble.innerText||lastBubble.textContent);
+    }
+    doc.save('spert-export.pdf');
+    showToast('✓ PDF downloaded');
+  } catch(e) { showToast('PDF export failed: '+e.message); }
+}
+
+/* ═══ MODEL CHIPS ═══ */
+function initModelChips() {
+  const el=document.getElementById('modelChips');
+  if (!el) return;
+  const keys=getKeys();
+  el.innerHTML='';
+  MODELS.forEach(m=>{
+    const hasKey=!!(keys[m.prov]);
+    const c=document.createElement('div');
+    const isSel=selectedModels.has(m.id);
+    c.className='model-chip'+(isSel?' sel':'');
+    c.id='mchip-'+m.id;
+    const name=m.mid.split('/').pop().replace(':free','').replace('-latest','').replace('-versatile','').replace('-distill-llama-70b','');
+    c.textContent=name;
+    c.title=m.mid+' ('+m.prov+')'+(hasKey?' — key active':' — no key in Settings');
+    if (hasKey) { c.style.boxShadow='0 0 0 2px var(--green)'; c.style.borderColor='var(--green)'; }
+    else { c.style.opacity='0.45'; }
+    c.onclick=()=>{
+      if(selectedModels.has(m.id)){if(selectedModels.size>1)selectedModels.delete(m.id);}
+      else selectedModels.add(m.id);
+      c.classList.toggle('sel',selectedModels.has(m.id));
+      syncToCloud();
+    };
+    el.appendChild(c);
+  });
+}
+
+/* ═══ CONSENSUS WIRING ═══ */
+async function callWithConsensus(system, user, useSearch=true, maxTok=4000, onChunk=null) {
+  const consOn=document.getElementById('consToggle')?.classList.contains('on');
+  const keys=getKeys();
+  const avail=MODELS.filter(m=>selectedModels.has(m.id)&&keys[m.prov]);
+  if (!consOn || avail.length < 2) {
+    return callBestModel(system, user, useSearch, maxTok, onChunk);
+  }
+  const pool=avail.slice(0,3);
+  const results=await Promise.allSettled(
+    pool.map((m,i)=>callModel(m,system,user,useSearch,maxTok, i===0?onChunk:null))
+  );
+  const good=results.filter(r=>r.status==='fulfilled').map(r=>r.value);
+  if (!good.length) throw new Error('All models failed');
+  if (good.length===1) return good[0];
+  const mergeInput=good.map((r,i)=>`=== MODEL ${i+1} ===\n${r}`).join('\n\n');
+  return callBestModel(
+    'Merge these AI responses into the single best answer. Use majority agreement on facts. Remove repetition. Output ONLY the merged answer.',
+    mergeInput, false, maxTok, null
+  );
+}
+
+/* ═══════════════════════════════════
+   SEARCH TOGGLE SYNC
+   wsBtn (toolbar) and wsToggle (mode panel) must always match.
+═══════════════════════════════════ */
+function toggleSearchSync() {
+  const btn=document.getElementById('wsBtn');
+  const tog=document.getElementById('wsToggle');
+  if (!btn||!tog) return;
+  btn.classList.toggle('on');
+  tog.classList.toggle('on', btn.classList.contains('on'));
+}
+
+function toggleSearchSyncPanel() {
+  const tog=document.getElementById('wsToggle');
+  const btn=document.getElementById('wsBtn');
+  if (!tog||!btn) return;
+  tog.classList.toggle('on');
+  btn.classList.toggle('on', tog.classList.contains('on'));
+}
+
+/* ═══ VOICE INPUT ═══ */
+let voiceRecog=null; let voiceActive=false;
+function toggleVoiceInput() {
+  const btn=document.getElementById('voiceBtn');
+  if (!('webkitSpeechRecognition' in window||'SpeechRecognition' in window)) {
+    btn.textContent='🎤 N/A'; btn.title='Voice input not supported in this browser'; return;
+  }
+  if (voiceActive) { voiceRecog&&voiceRecog.stop(); return; }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  voiceRecog=new SR();
+  voiceRecog.lang='en-US'; voiceRecog.interimResults=true; voiceRecog.maxAlternatives=1;
+  voiceRecog.onstart=()=>{ voiceActive=true; btn.classList.add('on'); btn.textContent='🔴 Stop'; };
+  voiceRecog.onend=()=>{ voiceActive=false; btn.classList.remove('on'); btn.textContent='🎤 Voice'; };
+  voiceRecog.onerror=(e)=>{ voiceActive=false; btn.classList.remove('on'); btn.textContent='🎤 Voice'; };
+  voiceRecog.onresult=(e)=>{
+    const input=document.getElementById('mainInput');
+    let transcript='';
+    for(let i=e.resultIndex;i<e.results.length;i++) transcript+=e.results[i][0].transcript;
+    input.value=transcript; autoResize(input);
+    if(e.results[e.results.length-1].isFinal) { voiceRecog.stop(); setTimeout(()=>sendMessage(),300); }
+  };
+  voiceRecog.start();
+}
+
+/* ═══ DRAG & DROP ═══ */
+function initDragDrop() {
+  let dragDepth=0;
+  const overlay=document.getElementById('dragOverlay');
+  document.addEventListener('dragenter',(e)=>{
+    e.preventDefault();
+    if([...e.dataTransfer.types].includes('Files')){dragDepth++;overlay.classList.add('active');}
+  });
+  document.addEventListener('dragleave',(e)=>{ dragDepth--;if(dragDepth<=0){dragDepth=0;overlay.classList.remove('active');} });
+  document.addEventListener('dragover',(e)=>{ e.preventDefault(); });
+  document.addEventListener('drop',(e)=>{
+    e.preventDefault(); dragDepth=0; overlay.classList.remove('active');
+    const files=e.dataTransfer.files;
+    if(files.length){
+      const aiTab=document.getElementById('tab-ai');
+      if(!aiTab.classList.contains('active')){
+        document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        aiTab.classList.add('active');
+        document.querySelector('.nav-tab')&&document.querySelector('.nav-tab').classList.add('active');
+      }
+      handleFiles(files);
+    }
+  });
+}
+
+/* ═══ BOOT ═══ */
+function boot() {
+  // Apply theme immediately to prevent flash
+  const savedTheme = localStorage.getItem('spert_theme');
+  if (savedTheme) {
+    document.body.className = document.body.className.replace(/theme-\w+/g,'').trim();
+    document.body.classList.add('theme-'+savedTheme);
+    currentTheme = savedTheme;
+  } else {
+    currentTheme = 'ocean';
+    localStorage.setItem('spert_theme','ocean');
+  }
+  loadKeys();
+  loadGhLocally();
+  if (sbUrl&&sbKey) { loadFromCloud().then(()=>setTimeout(loadPatches,500)); }
+  renderProjects();
+  renderApps();
+  initThemeGrid();
+  initArtGrid();
+  updatePassDesc();
+
+  // Seed upgrade chat welcome message
+  const chat=document.getElementById('upgradeChat');
+  if (!chat.children.length) {
+    const w=document.createElement('div'); w.className='umsg ai';
+    w.innerHTML='<strong style="color:var(--accent)">Spert Upgrade Studio</strong><br>Tell me what you want to add or change. I\'ll explain the plan, give you a checklist of changes to approve, and apply only what you want.<br><br><span style="color:var(--fg3)">Try: "Add a history sidebar", "Make the font bigger", "Add a word count"</span>';
+    chat.appendChild(w);
+  }
+
+  if (localStorage.getItem('spert_ghToken')&&localStorage.getItem('spert_ghRepo')) {
+    document.getElementById('statusDot').title='GitHub connected';
+  }
+
+  initModelChips();
+
+  // FIX: pdfBtn — two-step: first click arms (label changes), second click exports
+  const pdfOutBtn=document.getElementById('pdfBtn');
+  if (pdfOutBtn) {
+    pdfOutBtn.addEventListener('click', function() {
+      if (!this.classList.contains('on')) {
+        // First click: arm export mode
+        this.classList.add('on');
+        this.textContent='📄 Export now ↓';
+        showToast('Click "Export now" again to download PDF');
+      } else {
+        // Second click: export and reset
+        this.classList.remove('on');
+        this.textContent='📄 PDF out';
+        exportLastResponsePDF();
+      }
+    });
+  }
+
+  window.addEventListener('resize',()=>{ if(artMode!=='none') applyArt(artMode); });
+  initDragDrop();
+  updateUsageBadge();
+  loadDrafts();
+}
+
+boot();
+</script>
+</body>
+</html>
